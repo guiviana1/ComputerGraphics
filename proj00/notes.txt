@@ -1,0 +1,132 @@
+PROJ00
+
+interpolação Linear - método matematico para estimar valores desconhecidos entre dois pontos conhecidos (xo, y0) e (x1, y1).
+assumindo uma variação constante entre eles
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+PROJ01
+
+para salvar o background na memoria, salvar em um vector\<unsigned char> para ter  utilizar a biblioteca lodepng.
+
+
+
+
+
+
+render() -> metodo e o main rendering loop
+paramSet -> class: heterogeneous dictionary (hash table, map, sla) paramSet vai ser um dicionario heterogeneo que vai guardar
+string associada a rgbcolor, 
+
+escolher a biblioteca matematica
+
+background terá mais de um tipo. 
+    tipo b1 = single color, iniciar o bg inteiro apenas com uma cor
+    tipo b2 = 4_colors, recebe 4 cores das extremidades e gera o fundo utilizando interpolação bilinear
+    tipo b3 = images, vai utilizar uma textura / imagem especifica a ser carregada
+
+a validação dos argumentos de paramSet serão feitas no parser (?)
+
+
+BOTH:
+
+Para rodar o src01, utilizar o comando:
+g++ main.cpp background.cpp -o teste
+
+./teste
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+class Imagem
+{
+public:
+    int largura, altura;
+    std::vector<Pixel> pixels;
+
+    Imagem(int w, int h) : largura(w), altura(h) { //dflt ctro inicializando com w e h
+        pixels.resize(w * h);
+    }
+
+    Pixel& operator()(int x, int y) { //acesso por (x,y)
+        return pixels[y * largura + x]; //? -> pq os valores estão em posições contiguas
+    } //isso aqui me retorna um objeto Pixel na posição (x,y)
+
+    //save_ppm ()
+
+    Pixel set_pixel(int r, int g, int b) {
+        Pixel* pixel = new Pixel;
+        pixel->r = r;
+        pixel->g = g;
+        pixel->b = b;
+
+    }
+};
