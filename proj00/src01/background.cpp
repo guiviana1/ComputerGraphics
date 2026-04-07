@@ -1,7 +1,7 @@
 #include "background.h"
 
 BackgroundColor::BackgroundColor(const std::vector<RGBColor>& colors) {
-    if(colors.size() < 4) {
+    if(colors.size() != 4) {
         std::cout << "Erro na inicialização do objeto.\n";
     }
     for(int i = 0; i < colors.size(); i++) {
