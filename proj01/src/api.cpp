@@ -59,8 +59,8 @@ void API::render() {
     for (int j = 0; j < h; j++) {
         for (int i = 0; i < w; i++) {
 
-            float u = float(i) / float(w);
-            float v = 1.0f - float(j) / float(h); // j=0 é o topo da imagem, v=1 é o topo do background
+            float u = float(i) / float(w - 1);
+            float v = 1.0f - float(j) / float(h - 1); // j=0 é o topo da imagem, v=1 é o topo do background
 
             auto color = background->sampleUV(u, v);
             film->add(i, j, color);
