@@ -17,7 +17,7 @@ struct RunningOptions {
 
 class API {
 private:
-    static std::unique_ptr<Background> background;
+    static std::shared_ptr<Background> background;
     static std::unique_ptr<Film> film;
 
     static RunningOptions options;
@@ -30,7 +30,7 @@ public:
     static void run();
 
     // chamadas do parser
-    static void set_background(Background* bg);
+    static void set_background(std::shared_ptr<Background> bg);
     static void set_film(int width, int height);
 
     // render

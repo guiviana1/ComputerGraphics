@@ -1,7 +1,7 @@
-#include <api.h>
-#include <parserxml.h>
+#include "api.h"
+#include "parserxml.h"
 
-std::unique_ptr<Background> API::background = nullptr;
+std::shared_ptr<Background> API::background = nullptr;
 std::unique_ptr<Film> API::film = nullptr;
 RunningOptions API::options;
 
@@ -17,17 +17,31 @@ void API::init_engine(const RunningOptions& opt) {
 
 // ================= RUN =================
 void API::run() {
-    // futuramente:
-    // parse(options.input_file);
 
-    // POR ENQUANTO (sem parser):
+    if (options.input_file.empty()) {
+        throw std::runtime_error("Nenhum arquivo de entrada fornecido");
+    }
+
+    Parser parser;
+    SceneData data = parser.parse(options.input_file);
+
+    // configurar API com dados do parser
+    set_background(data.background);
+    set_film(data.film_width, data.film_height);
+
+    // renderizar
     render();
-    write_image();
+
+    // salvar (usa nome do XML ou override)
+    if (!options.output_file.empty())
+        film->write_image(options.output_file);
+    else
+        film->write_image(data.film_filename);
 }
 
 // ================= SETTERS =================
-void API::set_background(Background* bg) {
-    background.reset(bg);
+void API::set_background(std::shared_ptr<Background> bg) {
+    background = bg;
 }
 
 void API::set_film(int width, int height) {

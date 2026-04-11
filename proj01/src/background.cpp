@@ -1,4 +1,4 @@
-#include <backgroundd.h> 
+#include "backgroundd.h" 
 
     BackgroundSingleColor::BackgroundSingleColor(const RGBColor& c) {
         this->color = c;
