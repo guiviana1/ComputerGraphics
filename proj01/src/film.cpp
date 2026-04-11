@@ -28,4 +28,6 @@ int Film::getWidth() const {
     return width;
 }
 
+//o background é o que a câmera enxerga, o film é a foto final que ela tirou
+//é o que fica, o que ela capturou, é para onde os raios vão voltar quando baterem no background e voltar
 

@@ -7,7 +7,7 @@
     RGBColor BackgroundSingleColor::sampleUV(float u, float v) const {
         return color;
     }
-    //sampleuv (só retorna a cor utilizada na construção)
+    //a função sampleuv da classe SINGLECOLOR só retorna a cor utilizada na construção
 
 
 
