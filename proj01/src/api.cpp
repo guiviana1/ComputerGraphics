@@ -22,8 +22,7 @@ void API::run() {
         throw std::runtime_error("Nenhum arquivo de entrada fornecido");
     }
 
-    Parser parser;
-    SceneData data = parser.parse(options.input_file);
+    SceneData data = Parser::parse(options.input_file);
 
     // configurar API com dados do parser
     set_background(data.background);
@@ -61,7 +60,7 @@ void API::render() {
         for (int i = 0; i < w; i++) {
 
             float u = float(i) / float(w);
-            float v = float(j) / float(h);
+            float v = 1.0f - float(j) / float(h); // j=0 é o topo da imagem, v=1 é o topo do background
 
             auto color = background->sampleUV(u, v);
             film->add(i, j, color);

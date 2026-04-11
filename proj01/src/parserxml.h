@@ -3,7 +3,7 @@
 #include <string>
 #include <memory>
 #include <vector>
-#include "../src/backgroundd.h"
+#include "backgroundd.h"
 
 struct SceneData {
     std::shared_ptr<Background> background;

@@ -1,6 +1,8 @@
 #include "film.h"
 #include <fstream>
 
+Film::Film(int w, int h) : width(w), height(h), pixels(w * h) {}
+
 void Film::add(int x, int y, const RGBColor &color) {
     pixels[y * width + x] = color; //entender melhor isso aqui, o q isso substitui?
 } //essa formula adiciona no vector interno de film os valores dos pixels

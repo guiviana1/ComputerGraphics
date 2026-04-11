@@ -1,4 +1,7 @@
-#include "backgroundd.h" 
+#include "backgroundd.h"
+
+    RGBColor::RGBColor() : r(0), g(0), b(0) {}
+    RGBColor::RGBColor(float r, float g, float b) : r(r), g(g), b(b) {}
 
     BackgroundSingleColor::BackgroundSingleColor(const RGBColor& c) {
         this->color = c;
