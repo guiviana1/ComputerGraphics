@@ -9,10 +9,8 @@ RunningOptions API::options;
 void API::init_engine(const RunningOptions& opt) {
     options = opt;
 
-    // aqui você pode tratar flags como:
-    if (options.quick_render) {
-        // futuramente reduzir resolução
-    }
+    //tratar flags
+    if (options.quick_render) {}
 }
 
 // ================= RUN =================

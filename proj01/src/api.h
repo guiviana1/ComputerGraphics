@@ -8,12 +8,10 @@
 struct RunningOptions {
     std::string input_file;
     std::string output_file = "output.ppm";
-
     bool quick_render = false;
-
-    // crop window (opcional)
     int x0 = 0, x1 = -1, y0 = 0, y1 = -1;
 };
+//Flags presentes mas não implementadas.
 
 class API {
 private:

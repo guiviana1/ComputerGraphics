@@ -1,0 +1,46 @@
+ray.h
+
+/*
+Essa classe implementa um raio, com um ponto de origem (o) e um vetor de direção (d), ambos no
+espaço tridimensional (possuem 3 dimensões em seus atributos).
+
+O construtor permite definir o intervalo de t para o qual o raio é considerado válido, com t_min e t_max.
+Mas, para que e onde isso é usado no projeto? 
+
+O operador () é sobrecarregado para calcular o ponto ao longo do raio dado um valor de t. Novamente, onde
+isso é usado?
+*/
+
+
+
+
+scene.h
+    //o construtor recebe uma Camera, um Background e um vector de Primitive, com os objetos, e move 
+    //esses objetos para os membros da classe
+
+    //Utilizamos shared ptr porque queremos que a cena seja dona desses objetos, e que eles sejam compartilhados 
+    //entre diferentes partes do código (ex: a API pode querer acessar a camera ou o background para ler suas propriedades).
+    //O uso de shared ptr garante que os objetos sejam destruídos automaticamente quando não forem mais usados, 
+    //evitando vazamentos de memória.
+
+    std::vector<std::shared_ptr<Primitive>> primitives;
+    //Esse é um vector de shared ptr que armazena os objetos da cena. Porque ele é de primitive?
+
+    func intersect
+    //Porque essa a função recebe um Ray por referência e um Surfel por ponteiro?
+    //O Ray é passado por referência porque a função intersect() precisa atualizar o valor 
+    //de t_max do Ray a cada vez que encontra um hit. Se o Ray fosse passado por valor, estaríamos trabalhando com uma cópia do Ray, e as atualizações em t_max não afetariam o Ray original fora da função. Passar por referência permite que as mudanças em t_max sejam refletidas no Ray original.
+    //O Surfel é passado por ponteiro porque a função intersect() precisa preencher os dados
+
+
+
+
+vec3.h
+//Métodos básicos: Soma, subtração, multiplicação por escalar e negação. O método length() calcula o comprimento do vetor.
+
+/*
+//Essas são as duas estruturas principais que utilizaremos para representar o nosso RAIO no projeto. O Ray tem 
+//um ponto de origem (origin) e um vetor de direção (direction), ambos do tipo Point3 e Vector3, respectivamente.
+// O t_max é o valor máximo de t para o qual o raio é considerado válido, ou seja, o intervalo de t para o qual 
+//estamos interessados em encontrar interseções.
+*/
