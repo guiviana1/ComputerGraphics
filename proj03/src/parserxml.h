@@ -17,7 +17,7 @@
 struct SceneData {
     std::shared_ptr<Background> background;
     std::shared_ptr<Camera>     camera;
-    std::vector<std::shared_ptr<Primitive>> primitives; // NOVO
+    std::vector<std::shared_ptr<Primitive>> primitives; 
     int film_width;
     int film_height;
     std::string film_filename;

@@ -1,6 +1,6 @@
 <RT3>
     <lookat look_from="0 0 0" look_at="0 0 10" up="0 1 0" />
-    <camera type="" fovy="65" />
+    <camera type="perspective" fovy="65" />
     <integrator type="flat"/>
     <film type="image" w_res="800" h_res="600" filename="flat_spheres.ppm" img_type="ppm" />
 
