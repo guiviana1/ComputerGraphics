@@ -13,11 +13,6 @@
     //a função sampleuv da classe SINGLECOLOR só retorna a cor utilizada na construção
 
 
-
-    //----------------------------------------------------------------------------------------------------------------------------------
-
-
-
     Background4Colors::Background4Colors(const std::vector<RGBColor>& colors) {
         if(colors.size() != 4) {
             std::cout << "Erro na inicialização do objeto.\n";

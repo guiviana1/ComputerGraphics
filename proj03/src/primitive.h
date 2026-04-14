@@ -5,16 +5,7 @@
 #include "material.h"
 #include <memory>
 
-/*!
- * @brief Classe base abstrata para qualquer superficie que um raio possa atingir.
- *
- * Todo objeto geometrico da cena (esfera, triangulo, plano...) deve
- * herdar de Primitive e implementar os dois metodos de intersecao.
- *
- * Por que abstrata? Porque queremos tratar todos os objetos de forma
- * uniforme: a cena guarda uma lista de Primitive*, e o integrador
- * itera sobre ela sem saber os tipos concretos.
- */
+
 class Primitive {
 protected:
     std::shared_ptr<Material> material; //!< Material associado a esta primitiva.

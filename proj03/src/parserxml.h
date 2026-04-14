@@ -8,12 +8,7 @@
 #include "primitive.h"
 #include "material.h"
 
-/*!
- * @brief Dados completos da cena lidos do XML.
- *
- * Mudancas em relacao a versao anterior:
- *   - Adicionado campo 'primitives': lista de objetos geometricos da cena.
- */
+
 struct SceneData {
     std::shared_ptr<Background> background;
     std::shared_ptr<Camera>     camera;

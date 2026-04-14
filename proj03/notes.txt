@@ -44,3 +44,29 @@ vec3.h
 // O t_max é o valor máximo de t para o qual o raio é considerado válido, ou seja, o intervalo de t para o qual 
 //estamos interessados em encontrar interseções.
 */
+
+api.cpp
+
+render() func
+ * Integrador "flat":
+ *   - Para cada pixel, gera um raio.
+ *   - Testa intersecao com todos os objetos da cena (via Scene::intersect).
+ *   - Se houve hit: pinta o pixel com a cor do material do objeto atingido.
+ *   - Se nao houve hit: amostra o background.
+ *
+ * Por que "flat"? Porque a cor do objeto e atribuida diretamente, sem
+ * nenhum calculo de iluminacao. E o integrador mais simples possivel,
+ * util para validar que a geometria e a intersecao estao corretas antes
+ * de adicionar iluminacao.
+ *
+ * Conversao de cor:
+ *   - Material guarda cor em [0, 1] (ex: 0.95 = quase 1.0)
+ *   - Film/PPM espera [0, 255]
+ *   - Portanto multiplicamos por 255 antes de armazenar no Film.
+ *
+ *   - Background ja guarda cor em [0, 255] (conforme uso no parserxml.cpp)
+ *   - Entao o background nao precisa de conversao.
+ *
+ * NOTA: isso e uma inconsistencia ja presente no codigo original.
+ * Futuramente, padronizar tudo em [0,1] e converter so na escrita do PPM
+ * seria o ideal.

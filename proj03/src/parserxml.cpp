@@ -6,7 +6,6 @@
 #include <stdexcept>
 #include <cmath>
 
-// ── helpers internos ──────────────────────────────────────────────────────────
 
 static std::string readFile(const std::string& path) {
     std::ifstream f(path);
@@ -38,7 +37,6 @@ static Vector3 parseVector3(const std::string& s) {
     return Vector3(x, y, z);
 }
 
-// ── metodos privados ──────────────────────────────────────────────────────────
 
 std::string Parser::extractAttr(const std::string& text, const std::string& attr) {
     std::string key = attr + "=\"";
@@ -95,29 +93,6 @@ std::vector<std::string> Parser::extractSelfClosingTags(const std::string& xml, 
     return result;
 }
 
-// ── parse principal ───────────────────────────────────────────────────────────
-
-/*!
- * Formato XML suportado (dentro de <world_begin> / <world_end>):
- *
- *   <material type="flat" color="0.95 0.05 0.05" />
- *   <object type="sphere" radius="0.4" center="-1 0.5 5" />
- *
- * Logica de "material atual":
- *   O parser mantem um ponteiro para o ultimo material lido.
- *   Cada <object> que aparecer depois usa esse material.
- *   Isso espelha o padrao do XML descrito no README.
- *
- * Por que iterar manualmente pelo XML ao inves de usar uma lib XML?
- *   Manter a dependencia zero do projeto original. O parser artesanal
- *   funciona para o subset simples de XML usado aqui.
- *
- * Limitacao conhecida: o parser nao suporta multiplos materiais
- * intercalados com objetos de forma generica. Para isso, precisariamos
- * de um parser de verdade (ex: TinyXML2). Por ora, o ultimo <material>
- * antes dos <object>s e usado para todos eles — comportamento correto
- * para o XML do README.
- */
 SceneData Parser::parse(const std::string& filepath) {
     std::string xml = readFile(filepath);
     SceneData data;
@@ -208,10 +183,7 @@ SceneData Parser::parse(const std::string& filepath) {
         throw std::runtime_error("Parser: tipo de camera desconhecido: " + camType);
     }
 
-    // ── NOVO: <material> e <object> dentro de <world_begin>...</world_end> ──
 
-    // Extraimos o conteudo entre <world_begin/> e <world_end/>
-    // Estrategia: buscamos tudo depois de "world_begin" e antes de "world_end"
     std::string worldBeginMarker = "world_begin";
     std::string worldEndMarker   = "world_end";
 
@@ -225,11 +197,7 @@ SceneData Parser::parse(const std::string& filepath) {
         world_content = xml.substr(after_wb, we_pos - after_wb);
     }
 
-    // Itera sobre o conteudo do mundo procurando <material> e <object>
-    // de forma sequencial para respeitar a ordem do XML.
-    //
-    // Abordagem: buscamos alternadamente as proximas ocorrencias de
-    // "<material" e "<object", e processamos a que aparecer primeiro.
+
     std::shared_ptr<Material> current_material = nullptr;
 
     size_t pos = 0;

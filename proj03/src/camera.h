@@ -9,7 +9,6 @@ struct ScreenWindow {
 
 class Camera {
 protected:
-    // frame da câmera
     Point3  e;     // origem (look_from)
     Vector3 u_hat; // direita
     Vector3 v_hat; // cima
