@@ -14,20 +14,23 @@ bool Sphere::solve_intersection(const Ray& r, real_type& t_hit) const {
 
     real_type a      = dot(r.d, r.d);
     real_type half_b = dot(r.d, oc);
-    real_type c_coef = dot(oc, oc) - radius * radius;
 
-    real_type discriminant = half_b * half_b - a * c_coef;
-    if (discriminant < 0.0f)
+    // Reformulacao: discriminante via componente perpendicular de oc a d_hat.
+    // Evita cancelamento catastrofico quando a camera esta longe da cena
+    // (oc tem componente paralela gigante que se anularia algebricamente).
+    Vector3   d_hat   = normalize(r.d);
+    real_type proj    = dot(d_hat, oc);           // componente de oc paralela a d
+    Vector3   oc_perp = oc - d_hat * proj;        // componente perpendicular
+    real_type disc    = radius * radius - dot(oc_perp, oc_perp);
+
+    if (disc < 0.0f)
         return false;
 
-    real_type sqrt_disc = std::sqrt(discriminant);
+    // sqrt_disc = |d| * sqrt(disc), para manter t na escala do parametro do raio
+    real_type sqrt_disc = std::sqrt(disc * a);
 
-    // Citardauq: evita cancelamento catastrofico quando half_b ≈ sqrt_disc
-    real_type q = (half_b >= 0.0f) ? (-half_b - sqrt_disc) : (-half_b + sqrt_disc);
-    real_type t0 = q / a;
-    real_type t1 = c_coef / q;  // Vieta: t0*t1 = c/a
-
-    if (t0 > t1) std::swap(t0, t1);
+    real_type t0 = (-half_b - sqrt_disc) / a;
+    real_type t1 = (-half_b + sqrt_disc) / a;
 
     if (t0 >= r.t_min && t0 <= r.t_max) { t_hit = t0; return true; }
     if (t1 >= r.t_min && t1 <= r.t_max) { t_hit = t1; return true; }

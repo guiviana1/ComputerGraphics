@@ -1,8 +1,8 @@
 <RT3>
-    <lookat look_from="0 0 0" look_at="0 0 10" up="0 1 0" />
+    <lookat look_from="0 0 100000" look_at="0 0 10" up="0 1 0" />
     <camera type="orthographic" screen_window="-4 4 -3 3"/>
     <integrator type="flat"/>
-    <film type="image" w_res="800" h_res="600" filename="flat_spheres_ortho1.ppm" img_type="ppm" />
+    <film type="image" w_res="800" h_res="600" filename="c4.ppm" img_type="ppm" />
 
     <world_begin/>
         <!-- The Background -->
