@@ -1,0 +1,82 @@
+<RT3>
+    <!-- Cena 2: Vitrine de materiais -->
+    <!-- 5 esferas em fileira, mesmo diffuse azul, glossiness crescente -->
+    <!-- Perfeita para ver como o glossiness afeta o brilho -->
+    <lookat look_from="0 2 -7" look_at="0 0 0" up="0 1 0" />
+    <camera type="perspective" fovy="50" />
+    <integrator type="blinnphong" />
+    <film type="image" x_res="900" y_res="400" filename="materials_showcase.ppm" />
+
+    <world_begin/>
+
+        <background type="4_colors"
+            bl="0.08 0.08 0.12"
+            tl="0.15 0.15 0.22"
+            tr="0.15 0.15 0.22"
+            br="0.08 0.08 0.12" />
+
+        <light_source type="ambient" I="0.15 0.15 0.15" scale="1 1 1" />
+
+        <!-- Luz principal vinda do alto -->
+        <light_source type="directional"
+                      I="1.0 1.0 1.0"
+                      scale="0.8 0.8 0.8"
+                      from="2 5 -3"
+                      to="0 0 0" />
+
+        <!-- Luz de preenchimento lateral -->
+        <light_source type="point"
+                      I="0.4 0.5 0.7"
+                      scale="0.5 0.5 0.5"
+                      from="-5 1 -2" />
+
+        <!-- Mesma cor base (azul), glossiness progressivo: 4, 16, 64, 128, 512 -->
+        <!-- Isso mostra claramente como o brilho vai de fosco a espelhado -->
+
+        <make_named_material type="blinn" name="matte"
+            ambient="0.02 0.02 0.05"
+            diffuse="0.2 0.3 0.8"
+            specular="0.5 0.5 0.5"
+            glossiness="4" />
+
+        <make_named_material type="blinn" name="satin"
+            ambient="0.02 0.02 0.05"
+            diffuse="0.2 0.3 0.8"
+            specular="0.5 0.5 0.5"
+            glossiness="16" />
+
+        <make_named_material type="blinn" name="semi_gloss"
+            ambient="0.02 0.02 0.05"
+            diffuse="0.2 0.3 0.8"
+            specular="0.5 0.5 0.5"
+            glossiness="64" />
+
+        <make_named_material type="blinn" name="gloss"
+            ambient="0.02 0.02 0.05"
+            diffuse="0.2 0.3 0.8"
+            specular="0.5 0.5 0.5"
+            glossiness="128" />
+
+        <make_named_material type="blinn" name="mirror_like"
+            ambient="0.02 0.02 0.05"
+            diffuse="0.2 0.3 0.8"
+            specular="0.5 0.5 0.5"
+            glossiness="512" />
+
+        <!-- Fileira de esferas, da esquerda (fosca) para direita (brilhante) -->
+        <object type="sphere" radius="0.65" center="-3.2 0.0 0.0" material="matte"       />
+        <object type="sphere" radius="0.65" center="-1.6 0.0 0.0" material="satin"       />
+        <object type="sphere" radius="0.65" center=" 0.0 0.0 0.0" material="semi_gloss"  />
+        <object type="sphere" radius="0.65" center=" 1.6 0.0 0.0" material="gloss"       />
+        <object type="sphere" radius="0.65" center=" 3.2 0.0 0.0" material="mirror_like" />
+
+        <!-- Chão -->
+        <make_named_material type="blinn" name="floor"
+            ambient="0.03 0.03 0.03"
+            diffuse="0.4 0.4 0.4"
+            specular="0.2 0.2 0.2"
+            glossiness="32" />
+        <object type="sphere" radius="20.0" center="0.0 -20.65 0.0" material="floor" />
+
+    <world_end/>
+</RT3>
