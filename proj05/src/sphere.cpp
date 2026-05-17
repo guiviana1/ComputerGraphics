@@ -1,13 +1,11 @@
 #include "sphere.h"
 #include <cmath>
 
-// ── Construtor ────────────────────────────────────────────────────────────────
 
 Sphere::Sphere(const Point3& center, real_type radius, std::shared_ptr<Material> mat)
     : Primitive(std::move(mat)), center(center), radius(radius)
 {}
 
-// ── Nucleo matematico ─────────────────────────────────────────────────────────
 
 bool Sphere::solve_intersection(const Ray& r, real_type& t_hit) const {
     Vector3 oc = r.o - center;
@@ -19,8 +17,8 @@ bool Sphere::solve_intersection(const Ray& r, real_type& t_hit) const {
     // Evita cancelamento catastrofico quando a camera esta longe da cena
     // (oc tem componente paralela gigante que se anularia algebricamente).
     Vector3   d_hat   = normalize(r.d);
-    real_type proj    = dot(d_hat, oc);           // componente de oc paralela a d
-    Vector3   oc_perp = oc - d_hat * proj;        // componente perpendicular
+    real_type proj    = dot(d_hat, oc);     // componente de oc paralela a d
+    Vector3   oc_perp = oc - d_hat * proj;      // componente perpendicular
     real_type disc    = radius * radius - dot(oc_perp, oc_perp);
 
     if (disc < 0.0f)
@@ -38,7 +36,6 @@ bool Sphere::solve_intersection(const Ray& r, real_type& t_hit) const {
     return false;
 }
 
-// ── intersect() ──────────────────────────────────────────────────────────────
 
 bool Sphere::intersect(Ray& r, Surfel* sf) const {
     real_type t_hit;
@@ -47,7 +44,6 @@ bool Sphere::intersect(Ray& r, Surfel* sf) const {
 
     r.t_max = t_hit;
 
-    // ── Preenche o Surfel ──────────────────────────────────────────────────
     if (sf != nullptr) {
         Point3 hit_point = r(t_hit); // p = o + d*t
 
@@ -66,10 +62,8 @@ bool Sphere::intersect(Ray& r, Surfel* sf) const {
     return true;
 }
 
-// ── intersect_p() ─────────────────────────────────────────────────────────────
 
 bool Sphere::intersect_p(const Ray& r) const {
     real_type t_hit;
-    // Nao atualiza t_max, nao preenche Surfel — so testa existencia
     return solve_intersection(r, t_hit);
 }

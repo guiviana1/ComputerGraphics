@@ -1,0 +1,81 @@
+<RT3>
+    <!-- Câmera perspectiva olhando para a cena -->
+    <lookat look_from="0 2 -5" look_at="0 0 3" up="0 1 0" />
+    <camera type="perspective" fovy="60" />
+    <integrator type="blinnphong" />
+    <film type="image" x_res="800" y_res="600" filename="blinnphong_test.ppm" />
+
+    <world_begin/>
+
+        <!-- Background escuro para as luzes se destacarem -->
+        <background type="single_color" color="0.05 0.05 0.08" />
+
+        <!-- ── Luzes ─────────────────────────────────────────────────── -->
+        <!-- Ambient leve: evita que o lado escuro das esferas fique preto absoluto -->
+        <light_source type="ambient" I="0.2 0.2 0.2" scale="1 1 1" />
+
+        <!-- Luz direcional: simula iluminação vinda do alto-esquerda -->
+        <light_source type="directional"
+                      I="0.9 0.9 0.85"
+                      scale="0.7 0.7 0.7"
+                      from="2 4 -3"
+                      to="0 0 0" />
+
+        <!-- Luz pontual: posicionada à direita da cena, levemente colorida -->
+        <light_source type="point"
+                      I="0.8 0.7 0.5"
+                      scale="0.8 0.8 0.8"
+                      from="4 3 0" />
+
+        <!-- ── Materiais nomeados ─────────────────────────────────────── -->
+        <!-- Ouro: alta especularidade, glossiness alto -->
+        <make_named_material type="blinn" name="gold"
+            ambient="0.05 0.05 0.01"
+            diffuse="1.0 0.65 0.0"
+            specular="0.8 0.6 0.2"
+            glossiness="256" />
+
+        <!-- Prata: alta especularidade branca -->
+        <make_named_material type="blinn" name="silver"
+            ambient="0.05 0.05 0.05"
+            diffuse="0.7 0.7 0.75"
+            specular="0.9 0.9 0.95"
+            glossiness="128" />
+
+        <!-- Plástico vermelho: difuso, pouco especular -->
+        <make_named_material type="blinn" name="red_plastic"
+            ambient="0.05 0.01 0.01"
+            diffuse="0.9 0.1 0.1"
+            specular="0.4 0.4 0.4"
+            glossiness="32" />
+
+        <!-- Borracha azul: muito fosca, sem highlight -->
+        <make_named_material type="blinn" name="blue_rubber"
+            ambient="0.01 0.01 0.05"
+            diffuse="0.1 0.2 0.8"
+            specular="0.05 0.05 0.05"
+            glossiness="4" />
+
+        <!-- ── Objetos ────────────────────────────────────────────────── -->
+        <!-- Esfera ouro: centro-esquerda -->
+        <object type="sphere" radius="0.8" center="-2.0 0.0 2.0" material="gold" />
+
+        <!-- Esfera prata: centro -->
+        <object type="sphere" radius="0.8" center="0.0 0.0 2.0" material="silver" />
+
+        <!-- Esfera plástico vermelho: centro-direita -->
+        <object type="sphere" radius="0.8" center="2.0 0.0 2.0" material="red_plastic" />
+
+        <!-- Esfera borracha azul: acima, entre as outras -->
+        <object type="sphere" radius="0.6" center="0.0 1.6 2.0" material="blue_rubber" />
+
+        <!-- "Chão": esfera gigante abaixo das outras -->
+        <make_named_material type="blinn" name="ground"
+            ambient="0.03 0.04 0.03"
+            diffuse="0.3 0.5 0.3"
+            specular="0.1 0.1 0.1"
+            glossiness="16" />
+        <object type="sphere" radius="20.0" center="0.0 -20.8 2.0" material="ground" />
+
+    <world_end/>
+</RT3>
