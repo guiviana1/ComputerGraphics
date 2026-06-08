@@ -5,6 +5,7 @@
 #include <sstream>
 #include <stdexcept>
 #include <cmath>
+#include <cctype>
 #include <map>
 
 // ── Utilitários de arquivo ────────────────────────────────────────────────────
@@ -26,12 +27,30 @@ static std::string dirOf(const std::string& path) {
 // ── Helpers de extração ───────────────────────────────────────────────────────
 
 std::string Parser::extractAttr(const std::string& text, const std::string& attr) {
-    std::string key = attr + "=\"";
-    size_t pos = text.find(key);
-    if (pos == std::string::npos) return "";
-    pos += key.size();
-    size_t end = text.find('"', pos);
-    return text.substr(pos, end - pos);
+    // Procura o atributo tolerando espacos ao redor do '=' (ex.: glossiness ="256")
+    // e exigindo uma fronteira de palavra antes do nome (evita casar substrings,
+    // p.ex. "from" dentro de "look_from").
+    auto is_ws = [](char c) { return std::isspace(static_cast<unsigned char>(c)) != 0; };
+
+    size_t pos = 0;
+    while ((pos = text.find(attr, pos)) != std::string::npos) {
+        bool boundary_ok = (pos == 0) || is_ws(text[pos - 1]);
+
+        size_t q = pos + attr.size();
+        while (q < text.size() && is_ws(text[q])) ++q;          // espacos antes do '='
+
+        if (boundary_ok && q < text.size() && text[q] == '=') {
+            ++q;
+            while (q < text.size() && is_ws(text[q])) ++q;       // espacos depois do '='
+            if (q < text.size() && text[q] == '"') {
+                ++q;
+                size_t end = text.find('"', q);
+                return text.substr(q, end - q);
+            }
+        }
+        pos += attr.size();
+    }
+    return "";
 }
 
 int Parser::extractIntOpt(const std::string& text, const std::string& attr, int fallback) {
@@ -146,6 +165,7 @@ std::vector<SceneData> Parser::parse(const std::string& filepath) {
     int    film_w               = 800;
     int    film_h               = 600;
     std::string film_filename   = "output.ppm";
+    bool   film_gamma           = false;
 
     // Estado do mundo (preservado para render_again)
     std::shared_ptr<Background>             background;
@@ -193,6 +213,8 @@ std::vector<SceneData> Parser::parse(const std::string& filepath) {
             film_w        = extractIntOpt(tag, "x_res", extractIntOpt(tag, "w_res", 800));
             film_h        = extractIntOpt(tag, "y_res", extractIntOpt(tag, "h_res", 600));
             film_filename = extractAttr(tag, "filename");
+            std::string gc = extractAttr(tag, "gamma_corrected");
+            film_gamma     = (gc == "true" || gc == "1");
         }
         else if (name == "integrator") {
             integrator_type = extractAttr(tag, "type");
@@ -359,6 +381,7 @@ std::vector<SceneData> Parser::parse(const std::string& filepath) {
                 data.film_width      = film_w;
                 data.film_height     = film_h;
                 data.film_filename   = film_filename;
+                data.film_gamma      = film_gamma;
                 data.background      = background;
                 data.primitives      = primitives;
                 data.lights          = lights;           // NOVO
@@ -376,6 +399,7 @@ std::vector<SceneData> Parser::parse(const std::string& filepath) {
             data.film_width      = film_w;
             data.film_height     = film_h;
             data.film_filename   = film_filename;
+            data.film_gamma      = film_gamma;
             data.background      = background;
             data.primitives      = primitives;
             data.lights          = lights;
