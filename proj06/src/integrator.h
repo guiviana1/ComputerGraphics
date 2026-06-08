@@ -27,7 +27,9 @@ public:
 
     virtual ~SamplerIntegrator() = default;
 
-    virtual std::optional<RGBColor> Li(const Ray& ray, const Scene& scene) const = 0;
+    // depth: nivel de recursao atual (usado pela reflexao espelho — proj06)
+    virtual std::optional<RGBColor> Li(const Ray& ray, const Scene& scene,
+                                       int depth = 0) const = 0;
 
     void render(const Scene& scene) override;
 };
@@ -39,15 +41,21 @@ public:
     RayCastIntegrator(std::shared_ptr<Camera> cam, std::shared_ptr<Film> f)
         : SamplerIntegrator(std::move(cam), std::move(f)) {}
 
-    std::optional<RGBColor> Li(const Ray& ray, const Scene& scene) const override;
+    std::optional<RGBColor> Li(const Ray& ray, const Scene& scene,
+                               int depth = 0) const override;
 };
 
 
 
 class BlinnPhongIntegrator : public SamplerIntegrator {
-public:
-    BlinnPhongIntegrator(std::shared_ptr<Camera> cam, std::shared_ptr<Film> f)
-        : SamplerIntegrator(std::move(cam), std::move(f)) {}
+private:
+    int max_depth;   //!< niveis maximos de recursao para a reflexao espelho
 
-    std::optional<RGBColor> Li(const Ray& ray, const Scene& scene) const override;
+public:
+    BlinnPhongIntegrator(std::shared_ptr<Camera> cam, std::shared_ptr<Film> f,
+                         int max_depth = 1)
+        : SamplerIntegrator(std::move(cam), std::move(f)), max_depth(max_depth) {}
+
+    std::optional<RGBColor> Li(const Ray& ray, const Scene& scene,
+                               int depth = 0) const override;
 };

@@ -1,0 +1,38 @@
+<RT3>
+    <!-- Demo de spotlights: tres cones de luz coloridos apontados para o chao,
+         mais algumas esferas para receber a luz e projetar sombra. -->
+
+    <lookat look_from="0 9 -11" look_at="0 0 1" up="0 1 0" />
+    <camera type="perspective" fovy="50" />
+    <integrator type="blinn_phong" depth="1" />
+    <film type="image" w_res="800" h_res="600" filename="spotlights.ppm" img_type="png" gamma_corrected="true" />
+
+    <world_begin/>
+        <background type="single_color" color="10 10 16" />
+
+        <!-- ambiente bem fraco: o destaque sao os cones de luz -->
+        <light_source type="ambient" I="0.06 0.06 0.06" scale="1 1 1" />
+
+        <!-- Tres spotlights coloridos apontando para o chao (de cima para baixo) -->
+        <light_source type="spot" I="1.0 0.2 0.2" scale="1 1 1"
+                      from="-4 6 0" to="-4 0 0" cutoff="26" falloff="16" />
+        <light_source type="spot" I="0.2 1.0 0.3" scale="1 1 1"
+                      from="0 6 1"  to="0 0 1"  cutoff="26" falloff="16" />
+        <light_source type="spot" I="0.3 0.4 1.0" scale="1 1 1"
+                      from="4 6 0"  to="4 0 0"  cutoff="26" falloff="16" />
+
+        <!-- chao branco fosco -->
+        <make_named_material type="blinn" name="floor"
+            ambient="0.2 0.2 0.2" diffuse="0.8 0.8 0.8" specular="0.1 0.1 0.1" glossiness="8" />
+
+        <!-- esferas claras para receber a cor das luzes -->
+        <make_named_material type="blinn" name="white"
+            ambient="0.2 0.2 0.2" diffuse="0.85 0.85 0.85" specular="0.6 0.6 0.6" glossiness="64" />
+
+        <object type="sphere" center="0 -1000 0" radius="1000" material="floor" />
+
+        <object type="sphere" center="-4 0.8 0" radius="0.8" material="white" />
+        <object type="sphere" center="0 0.8 1"  radius="0.8" material="white" />
+        <object type="sphere" center="4 0.8 0"  radius="0.8" material="white" />
+    <world_end/>
+</RT3>

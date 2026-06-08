@@ -4,6 +4,7 @@
 #include "light.h"
 #include <cmath>
 #include <algorithm>
+#include <limits>
 
 //multiplica duas cores componente a componente
 static RGBColor colorMul(const RGBColor& a, const RGBColor& b) {
@@ -26,6 +27,19 @@ static RGBColor colorClamp255(const RGBColor& c) {
     return RGBColor(cl(c.r), cl(c.g), cl(c.b));
 }
 
+// Mapeia uma direcao 3D para coordenadas (u,v) equiretangulares, usadas para
+// amostrar o background quando um raio secundario (reflexao) nao acerta nada.
+static void dirToUV(const Vector3& d, float& u, float& v) {
+    Vector3 n = normalize(d);
+    const float PI = 3.14159265358979f;
+    u = 0.5f + std::atan2(n.x, n.z) / (2.0f * PI);
+    v = 0.5f - std::asin(std::max(-1.0f, std::min(1.0f, n.y))) / PI;
+}
+
+// Epsilon para afastar a origem dos raios secundarios da superficie,
+// evitando que o raio re-acerte a propria face (auto-intersecao).
+static const float RAY_EPS = 1e-3f;
+
 void SamplerIntegrator::render(const Scene& scene) {
     int w = film->getWidth();
     int h = film->getHeight();
@@ -38,7 +52,7 @@ void SamplerIntegrator::render(const Scene& scene) {
             float u = float(i) / float(w - 1);
             float v = 1.0f - float(j) / float(h - 1);
 
-            auto result = Li(ray, scene);
+            auto result = Li(ray, scene, 0);
             RGBColor color = result.has_value()
                 ? result.value()
                 : scene.background->sampleUV(u, v);
@@ -51,7 +65,8 @@ void SamplerIntegrator::render(const Scene& scene) {
 }
 
 
-std::optional<RGBColor> RayCastIntegrator::Li(const Ray& ray, const Scene& scene) const {
+std::optional<RGBColor> RayCastIntegrator::Li(const Ray& ray, const Scene& scene,
+                                              int /*depth*/) const {
     Ray r = ray;
     Surfel sf;
     if (!scene.intersect(r, &sf))
@@ -63,7 +78,8 @@ std::optional<RGBColor> RayCastIntegrator::Li(const Ray& ray, const Scene& scene
     return fm->kd();
 }
 //*
-std::optional<RGBColor> BlinnPhongIntegrator::Li(const Ray& ray, const Scene& scene) const {
+std::optional<RGBColor> BlinnPhongIntegrator::Li(const Ray& ray, const Scene& scene,
+                                                 int depth) const {
 
     Ray r = ray;
     Surfel sf;
@@ -100,6 +116,12 @@ std::optional<RGBColor> BlinnPhongIntegrator::Li(const Ray& ray, const Scene& sc
         Vector3  wi = ls.wi;    // l̂: direção normalizada PARA a luz
         RGBColor Ii = ls.intensity;     // intensidade efetiva (já com scale/att)
 
+        // ── SOMBRA: dispara um raio de sombra de sf.p ate a luz. Se algo
+        //    bloqueia, esta luz nao contribui (difuso + especular pulados).
+        VisibilityTester vis(sf.p, N, wi, ls.dist);
+        if (!vis.unoccluded(scene))
+            continue;
+
         float n_dot_l = std::max(0.0f, dot(N, wi));
         RGBColor diffuse = colorMul(Ii, colorScale(kd, n_dot_l));
 
@@ -117,7 +139,34 @@ std::optional<RGBColor> BlinnPhongIntegrator::Li(const Ray& ray, const Scene& sc
         L = colorAdd(L, ambient);
     }
 
-    L = colorClamp255(colorScale(L, 255.0f));
+    // Cor local do Blinn-Phong, ja no espaco de exibicao [0,255].
+    RGBColor L255 = colorClamp255(colorScale(L, 255.0f));
 
-    return L;
+    // ── REFLEXAO ESPELHO (proj06) ──────────────────────────────────────────
+    // Se o material reflete e ainda nao atingimos a profundidade maxima,
+    // seguimos o raio refletido na cena e somamos km * cor_refletida.
+    if (mat->is_mirror() && depth < max_depth) {
+        Vector3 d    = normalize(r.d);            // direcao incidente
+        Vector3 refl = reflect(d, N);             // reflexao perfeita sobre N
+
+        // offset por epsilon para nao re-acertar a propria superficie
+        Ray reflected(sf.p + refl * RAY_EPS, refl, RAY_EPS,
+                      std::numeric_limits<float>::infinity());
+
+        auto rc = Li(reflected, scene, depth + 1);
+
+        RGBColor reflColor;
+        if (rc.has_value()) {
+            reflColor = rc.value();              // ja em [0,255]
+        } else {
+            // raio refletido nao acertou nada: amostra o background
+            float u, v; dirToUV(refl, u, v);
+            reflColor = scene.background->sampleUV(u, v);
+        }
+
+        RGBColor km = mat->mirror();             // coeficiente em [0,1]
+        L255 = colorClamp255(colorAdd(L255, colorMul(km, reflColor)));
+    }
+
+    return L255;
 }

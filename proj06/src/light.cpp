@@ -1,11 +1,14 @@
 #include "light.h"
 #include <cmath>
 #include <limits>
+#include <algorithm>
 
 
 DirectionalLight::DirectionalLight(const RGBColor& I, const RGBColor& scale,
-                                   const Point3& from, const Point3& to)
+                                   const Point3& from, const Point3& to,
+                                   float world_radius)
     : Light(LightType::directional, I, scale)
+    , world_radius(world_radius)
 {
 
     // wi deve apontar do ponto da superficie PARA a luz, ou seja, o OPOSTO
@@ -14,10 +17,13 @@ DirectionalLight::DirectionalLight(const RGBColor& I, const RGBColor& scale,
 }
 
 LightSample DirectionalLight::sample_Li(const Point3& /*hit_point*/) const {
+    // dist = world_radius: limite ate onde o raio de sombra e testado
+    // (a luz direcional esta "infinitamente" longe, mas o raio de sombra
+    //  precisa de um alcance finito para varrer a cena).
     return {
-        direction,                                     
-        effective_I,                                    
-        std::numeric_limits<float>::infinity()          
+        direction,
+        effective_I,
+        world_radius
     };
 }
 
@@ -45,4 +51,42 @@ LightSample PointLight::sample_Li(const Point3& hit_point) const {
     );
 
     return { wi, I_att, dist };
+}
+
+// ── Spotlight ──────────────────────────────────────────────────────────────
+SpotLight::SpotLight(const RGBColor& I, const RGBColor& scale,
+                     const Point3& from, const Point3& to,
+                     float cutoff_deg, float falloff_deg,
+                     float kc, float kl, float kq)
+    : Light(LightType::spot, I, scale)
+    , position(from)
+    , Kc(kc), Kl(kl), Kq(kq)
+{
+    spot_dir = normalize(to - from);   // eixo do cone (direcao de emissao)
+
+    const float deg2rad = 3.14159265358979f / 180.0f;
+    cos_cutoff  = std::cos(cutoff_deg  * deg2rad);   // angulo externo (maior)
+    cos_falloff = std::cos(falloff_deg * deg2rad);   // angulo interno (menor)
+}
+
+LightSample SpotLight::sample_Li(const Point3& hit_point) const {
+    // Igual a point light: direcao e distancia ate a luz + atenuacao
+    Vector3 to_light = position - hit_point;
+    float   dist     = to_light.length();
+    Vector3 wi       = normalize(to_light);
+
+    float att = 1.0f / (Kc + Kl * dist + Kq * dist * dist);
+
+    // Fator do cone: angulo entre o eixo do spot e a direcao luz->ponto.
+    // -wi e a direcao do ponto visto da luz (luz -> ponto).
+    float cos_angle = dot(spot_dir, -wi);
+
+    // Interpola linearmente entre o cone externo (0) e o interno (1).
+    float t    = (cos_angle - cos_cutoff) / (cos_falloff - cos_cutoff);
+    float spot = std::max(0.0f, std::min(1.0f, t));
+
+    float f = att * spot;
+    RGBColor I_eff(effective_I.r * f, effective_I.g * f, effective_I.b * f);
+
+    return { wi, I_eff, dist };
 }

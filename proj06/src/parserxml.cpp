@@ -162,6 +162,7 @@ std::vector<SceneData> Parser::parse(const std::string& filepath) {
     std::string cam_type        = "perspective";
     std::string cam_tag;
     std::string integrator_type = "flat";
+    int    integrator_depth     = 1;
     int    film_w               = 800;
     int    film_h               = 600;
     std::string film_filename   = "output.ppm";
@@ -218,6 +219,9 @@ std::vector<SceneData> Parser::parse(const std::string& filepath) {
         }
         else if (name == "integrator") {
             integrator_type = extractAttr(tag, "type");
+            // profundidade maxima da reflexao espelho: aceita "depth" ou "max_depth"
+            integrator_depth = extractIntOpt(tag, "depth",
+                                   extractIntOpt(tag, "max_depth", 1));
         }
 
         // ── Início do mundo ───────────────────────────────────────────────────
@@ -263,7 +267,10 @@ std::vector<SceneData> Parser::parse(const std::string& filepath) {
                     RGBColor kd  = parseColor(extractAttr(tag, "diffuse"));
                     RGBColor ks  = parseColor(extractAttr(tag, "specular"));
                     float    g   = std::stof(extractAttr(tag, "glossiness"));
-                    current_material = std::make_shared<BlinnPhongMaterial>(ka, kd, ks, g);
+                    // mirror e opcional: ausente => (0,0,0) (sem reflexao)
+                    std::string mir = extractAttr(tag, "mirror");
+                    RGBColor km  = mir.empty() ? RGBColor(0,0,0) : parseColor(mir);
+                    current_material = std::make_shared<BlinnPhongMaterial>(ka, kd, ks, g, km);
                 }
             }
 
@@ -283,7 +290,10 @@ std::vector<SceneData> Parser::parse(const std::string& filepath) {
                     RGBColor kd = parseColor(extractAttr(tag, "diffuse"));
                     RGBColor ks = parseColor(extractAttr(tag, "specular"));
                     float    g  = std::stof(extractAttr(tag, "glossiness"));
-                    named_materials[mname] = std::make_shared<BlinnPhongMaterial>(ka, kd, ks, g);
+                    // mirror e opcional: ausente => (0,0,0) (sem reflexao)
+                    std::string mir = extractAttr(tag, "mirror");
+                    RGBColor km = mir.empty() ? RGBColor(0,0,0) : parseColor(mir);
+                    named_materials[mname] = std::make_shared<BlinnPhongMaterial>(ka, kd, ks, g, km);
                 }
             }
 
@@ -346,8 +356,11 @@ std::vector<SceneData> Parser::parse(const std::string& filepath) {
                 } else if (ltype == "directional") {
                     Point3 from = parsePoint3(extractAttr(tag, "from"));
                     Point3 to   = parsePoint3(extractAttr(tag, "to"));
+                    // world_radius opcional: alcance do raio de sombra (default grande)
+                    std::string wr = extractAttr(tag, "world_radius");
+                    float world_radius = wr.empty() ? 1.0e6f : std::stof(wr);
                     lights.push_back(
-                        std::make_shared<DirectionalLight>(I, scale, from, to));
+                        std::make_shared<DirectionalLight>(I, scale, from, to, world_radius));
 
                 } else if (ltype == "point") {
                     Point3 from = parsePoint3(extractAttr(tag, "from"));
@@ -364,6 +377,29 @@ std::vector<SceneData> Parser::parse(const std::string& filepath) {
                     lights.push_back(
                         std::make_shared<PointLight>(I, scale, from, kc, kl, kq));
 
+                } else if (ltype == "spot") {
+                    // Spotlight (proj06): luz pontual com cone de influencia.
+                    //   from   = posicao da luz
+                    //   to     = ponto para onde o cone aponta
+                    //   cutoff = angulo externo (graus) — onde a luz zera
+                    //   falloff= angulo interno (graus) — onde a luz e total
+                    Point3 from   = parsePoint3(extractAttr(tag, "from"));
+                    Point3 to     = parsePoint3(extractAttr(tag, "to"));
+                    float  cutoff  = std::stof(extractAttr(tag, "cutoff"));
+                    float  falloff = std::stof(extractAttr(tag, "falloff"));
+
+                    // atenuacao opcional, igual a point
+                    float kc = 1.0f, kl = 0.0f, kq = 0.0f;
+                    std::string att = extractAttr(tag, "attenuation");
+                    if (!att.empty()) {
+                        std::istringstream ss(att);
+                        ss >> kc >> kl >> kq;
+                    }
+
+                    lights.push_back(
+                        std::make_shared<SpotLight>(I, scale, from, to,
+                                                    cutoff, falloff, kc, kl, kq));
+
                 } else {
                     throw std::runtime_error("Parser: tipo de luz desconhecido: " + ltype);
                 }
@@ -375,13 +411,14 @@ std::vector<SceneData> Parser::parse(const std::string& filepath) {
                 has_world = true;
 
                 SceneData data;
-                data.camera          = buildCamera(look_from, look_at, vup,
-                                                   cam_tag, cam_type, film_w, film_h);
-                data.integrator_type = integrator_type;
-                data.film_width      = film_w;
-                data.film_height     = film_h;
-                data.film_filename   = film_filename;
-                data.film_gamma      = film_gamma;
+                data.camera           = buildCamera(look_from, look_at, vup,
+                                                    cam_tag, cam_type, film_w, film_h);
+                data.integrator_type  = integrator_type;
+                data.integrator_depth = integrator_depth;
+                data.film_width       = film_w;
+                data.film_height      = film_h;
+                data.film_filename    = film_filename;
+                data.film_gamma       = film_gamma;
                 data.background      = background;
                 data.primitives      = primitives;
                 data.lights          = lights;           // NOVO
@@ -393,13 +430,14 @@ std::vector<SceneData> Parser::parse(const std::string& filepath) {
         // ── Render again ──────────────────────────────────────────────────────
         else if (name == "render_again" && has_world) {
             SceneData data;
-            data.camera          = buildCamera(look_from, look_at, vup,
-                                               cam_tag, cam_type, film_w, film_h);
-            data.integrator_type = integrator_type;
-            data.film_width      = film_w;
-            data.film_height     = film_h;
-            data.film_filename   = film_filename;
-            data.film_gamma      = film_gamma;
+            data.camera           = buildCamera(look_from, look_at, vup,
+                                                cam_tag, cam_type, film_w, film_h);
+            data.integrator_type  = integrator_type;
+            data.integrator_depth = integrator_depth;
+            data.film_width       = film_w;
+            data.film_height      = film_h;
+            data.film_filename    = film_filename;
+            data.film_gamma       = film_gamma;
             data.background      = background;
             data.primitives      = primitives;
             data.lights          = lights;

@@ -25,11 +25,12 @@ struct SceneData {
     std::vector<std::shared_ptr<Light>>      lights;
     std::shared_ptr<AmbientLight>            ambient_light;
 
-    std::string integrator_type = "flat";
-    int         film_width      = 800;
-    int         film_height     = 600;
-    std::string film_filename   = "output.ppm";
-    bool        film_gamma      = false;   // atributo gamma_corrected da tag <film>
+    std::string integrator_type  = "flat";
+    int         integrator_depth = 1;      // max_depth da reflexao espelho (tag integrator)
+    int         film_width       = 800;
+    int         film_height      = 600;
+    std::string film_filename    = "output.ppm";
+    bool        film_gamma       = false;  // atributo gamma_corrected da tag <film>
 };
 
 class Parser {
