@@ -81,9 +81,18 @@ LightSample SpotLight::sample_Li(const Point3& hit_point) const {
     // -wi e a direcao do ponto visto da luz (luz -> ponto).
     float cos_angle = dot(spot_dir, -wi);
 
-    // Interpola linearmente entre o cone externo (0) e o interno (1).
-    float t    = (cos_angle - cos_cutoff) / (cos_falloff - cos_cutoff);
-    float spot = std::max(0.0f, std::min(1.0f, t));
+    // Fator do cone. Quando cutoff == falloff nao existe zona de transicao:
+    // o spot tem BORDA DURA (intensidade total dentro do cone, zero fora).
+    // Tratamos esse caso a parte para evitar divisao por zero (que geraria NaN).
+    float spot;
+    float denom = cos_falloff - cos_cutoff;
+    if (std::fabs(denom) < 1e-6f) {
+        spot = (cos_angle >= cos_cutoff) ? 1.0f : 0.0f;   // borda dura
+    } else {
+        // Interpola linearmente entre o cone externo (0) e o interno (1).
+        float t = (cos_angle - cos_cutoff) / denom;
+        spot = std::max(0.0f, std::min(1.0f, t));
+    }
 
     float f = att * spot;
     RGBColor I_eff(effective_I.r * f, effective_I.g * f, effective_I.b * f);
