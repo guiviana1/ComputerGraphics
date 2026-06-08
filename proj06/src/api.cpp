@@ -19,7 +19,8 @@ void API::run() {
     auto jobs = Parser::parse(options.input_file);
 
     for (auto& data : jobs) {
-        auto film  = std::make_shared<Film>(data.film_width, data.film_height, data.film_filename);
+        auto film  = std::make_shared<Film>(data.film_width, data.film_height,
+                                            data.film_filename, data.film_gamma);
 
         // Monta a cena com background, primitivas e luzes
         auto scene = std::make_shared<Scene>(data.background, data.primitives);
@@ -31,8 +32,11 @@ void API::run() {
         if (data.integrator_type == "flat") {
             integrator = std::make_shared<RayCastIntegrator>(data.camera, film);
 
-        } else if (data.integrator_type == "blinnphong") {
-            // Novo integrador: implementa Blinn-Phong Reflection Model
+        } else if (data.integrator_type == "blinnphong" ||
+                   data.integrator_type == "blinn_phong" ||
+                   data.integrator_type == "blinn-phong") {
+            // Novo integrador: implementa Blinn-Phong Reflection Model.
+            // Aceita as variacoes de nome usadas nos arquivos de cena.
             integrator = std::make_shared<BlinnPhongIntegrator>(data.camera, film);
 
         } else {

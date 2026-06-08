@@ -29,6 +29,7 @@ struct SceneData {
     int         film_width      = 800;
     int         film_height     = 600;
     std::string film_filename   = "output.ppm";
+    bool        film_gamma      = false;   // atributo gamma_corrected da tag <film>
 };
 
 class Parser {

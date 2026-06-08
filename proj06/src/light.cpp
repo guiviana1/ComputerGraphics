@@ -8,7 +8,9 @@ DirectionalLight::DirectionalLight(const RGBColor& I, const RGBColor& scale,
     : Light(LightType::directional, I, scale)
 {
 
-    direction = normalize(to - from);
+    // wi deve apontar do ponto da superficie PARA a luz, ou seja, o OPOSTO
+    // da direcao de propagacao (from -> to). Por isso usamos from - to.
+    direction = normalize(from - to);
 }
 
 LightSample DirectionalLight::sample_Li(const Point3& /*hit_point*/) const {
