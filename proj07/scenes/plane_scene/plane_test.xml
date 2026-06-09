@@ -1,0 +1,35 @@
+<RT3>
+    <!-- Teste do primitivo Plane: um plano infinito (chao) com esferas em cima,
+         lancando sombras. O plano se estende ate o horizonte. -->
+
+    <lookat look_from="0 3 -10" look_at="0 0.8 0" up="0 1 0" />
+    <camera type="perspective" fovy="50" />
+    <integrator type="blinn_phong" depth="1" />
+    <film type="image" w_res="800" h_res="600" filename="plane_test.ppm" img_type="png" gamma_corrected="true" />
+
+    <world_begin/>
+        <background type="colors" bl="0.7 0.8 0.95" tl="0.15 0.35 0.8" tr="0.15 0.35 0.8" br="0.7 0.8 0.95" normalized="true" />
+
+        <light_source type="ambient"     I="0.2 0.2 0.2" scale="1 1 1" />
+        <light_source type="directional" I="0.9 0.9 0.9" scale="0.7 0.7 0.7" from="-3 5 -2" to="0 0 0" world_radius="100" />
+        <light_source type="point"       I="0.6 0.6 0.6" scale="0.7 0.7 0.7" from="4 6 -4" />
+
+        <make_named_material type="blinn" name="floor"
+            ambient="0.15 0.15 0.15" diffuse="0.55 0.55 0.6" specular="0.2 0.2 0.2" glossiness="32" />
+        <make_named_material type="blinn" name="red"
+            ambient="0.1 0.02 0.02" diffuse="0.9 0.15 0.15" specular="0.7 0.7 0.7" glossiness="64" />
+        <make_named_material type="blinn" name="green"
+            ambient="0.02 0.1 0.02" diffuse="0.2 0.8 0.25" specular="0.7 0.7 0.7" glossiness="64" />
+        <make_named_material type="blinn" name="gold"
+            ambient="0.2 0.15 0.0" diffuse="1 0.65 0.0" specular="0.8 0.6 0.2" glossiness="128" />
+
+        <!-- O PLANO infinito: passa pela origem, normal apontando para cima -->
+        <named_material name="floor"/>
+        <object type="plane" point="0 0 0" normal="0 1 0" />
+
+        <!-- esferas pousadas no plano -->
+        <object type="sphere" center="-2.5 1 0" radius="1" material="red"   />
+        <object type="sphere" center="0 1 0"    radius="1" material="green" />
+        <object type="sphere" center="2.5 1 0"  radius="1" material="gold"  />
+    <world_end/>
+</RT3>
