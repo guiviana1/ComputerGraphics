@@ -1,0 +1,19 @@
+<RT3>
+    <lookat look_from="0 0 -5" look_at="0 0 0" up="0 1 0" />
+    <camera type="perspective" fovy="60" />
+    <integrator type="blinnphong" />
+    <film type="image" x_res="400" y_res="400" filename="bug_directional.ppm" />
+
+    <world_begin/>
+        <background type="single_color" color="0 0 0" />
+
+        <!-- Luz vinda da ESQUERDA (e um pouco de cima/frente), apontando para a origem.
+             CORRETO: o lado ESQUERDO da esfera deve acender.
+             COM O BUG: acende o lado DIREITO (invertido). -->
+        <light_source type="directional" I="1 1 1" scale="1 1 1" from="-5 2 -4" to="0 0 0" />
+
+        <make_named_material type="blinn" name="m"
+            ambient="0 0 0" diffuse="0.85 0.85 0.85" specular="0 0 0" glossiness="1" />
+        <object type="sphere" radius="1.5" center="0 0 0" material="m" />
+    <world_end/>
+</RT3>

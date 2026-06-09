@@ -1,0 +1,54 @@
+<RT3>
+    <!-- Malha de triangulos declarada manualmente: um plano (2 triangulos) com
+         tres esferas em cima. Gera 2 imagens: vista de CIMA e vista de BAIXO,
+         para demonstrar o backface_cull. -->
+
+    <lookat look_from="0 7 -9" look_at="0 0.5 0" up="0 1 0" />
+    <camera type="perspective" fovy="50" />
+    <integrator type="blinn_phong" depth="1" />
+
+    <!-- ===== Vista de CIMA ===== -->
+    <film type="image" w_res="800" h_res="600" filename="trimesh_above.ppm" img_type="png" gamma_corrected="true" />
+
+    <world_begin/>
+        <background type="4_colors" bl="180 200 230" tl="40 90 200" tr="40 90 200" br="180 200 230" />
+
+        <light_source type="ambient"     I="0.25 0.25 0.25" scale="1 1 1" />
+        <light_source type="directional" I="0.9 0.9 0.9"    scale="0.6 0.6 0.6" from="-2 5 -3" to="0 0 0" world_radius="60" />
+        <light_source type="point"       I="0.7 0.7 0.7"    scale="0.6 0.6 0.6" from="3 6 -4" />
+
+        <!-- materiais -->
+        <make_named_material type="blinn" name="green_floor"
+            ambient="0.1 0.2 0.1" diffuse="0.2 0.7 0.25" specular="0.1 0.1 0.1" glossiness="16" />
+        <make_named_material type="blinn" name="red"
+            ambient="0.1 0.02 0.02" diffuse="0.9 0.15 0.15" specular="0.6 0.6 0.6" glossiness="64" />
+        <make_named_material type="blinn" name="blue"
+            ambient="0.02 0.02 0.1" diffuse="0.2 0.3 0.9" specular="0.6 0.6 0.6" glossiness="64" />
+        <make_named_material type="blinn" name="gold"
+            ambient="0.2 0.15 0.0" diffuse="1 0.65 0.0" specular="0.8 0.6 0.2" glossiness="128" />
+
+        <!-- O PLANO como malha de 2 triangulos -->
+        <named_material name="green_floor"/>
+        <object type="trianglemesh"
+            ntriangles="2"
+            vertices="-6 0 4  6 0 4  6 0 -4  -6 0 -4"
+            vertex_indices="0 1 2  0 2 3"
+            normals="0 1 0"
+            normal_indices="0 0 0  0 0 0"
+            uvs="0 0  1 0  0 1  1 1"
+            uv_indices="0 1 2  0 2 3"
+            reverse_vertex_order="false"
+            compute_normals="false"
+            backface_cull="true" />
+
+        <!-- tres esferas pousadas no plano (y = raio) -->
+        <object type="sphere" center="-2.5 1 0" radius="1" material="red"  />
+        <object type="sphere" center="0 1 0"    radius="1" material="blue" />
+        <object type="sphere" center="2.5 1 0"  radius="1" material="gold" />
+    <world_end/>
+
+    <!-- ===== Vista de BAIXO (plano deve sumir por causa do backface_cull) ===== -->
+    <lookat look_from="0 -7 -9" look_at="0 0.5 0" up="0 1 0" />
+    <film type="image" w_res="800" h_res="600" filename="trimesh_below.ppm" img_type="png" gamma_corrected="true" />
+    <render_again />
+</RT3>

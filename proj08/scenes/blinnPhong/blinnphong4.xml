@@ -1,0 +1,82 @@
+<RT3>
+    <!-- Cena 3: Pôr do sol -->
+    <!-- Luz direcional laranja-avermelhada vinda de baixo (como o sol no horizonte) -->
+    <!-- + luz azul fria vinda do céu para simular luz ambiente direcional -->
+    <lookat look_from="0 3 -8" look_at="0 0 0" up="0 1 0" />
+    <camera type="perspective" fovy="58" />
+    <integrator type="blinnphong" />
+    <film type="image" x_res="800" y_res="600" filename="sunset.ppm" />
+
+    <world_begin/>
+
+        <!-- Céu com gradiente laranja-azul -->
+        <background type="4_colors"
+            bl="0.85 0.35 0.05"
+            tl="0.10 0.15 0.45"
+            tr="0.10 0.15 0.45"
+            br="0.85 0.35 0.05" />
+
+        <!-- Ambient fria (céu azul) -->
+        <light_source type="ambient" I="0.3 0.35 0.5" scale="1 1 1" />
+
+        <!-- Sol no horizonte: luz laranja intensa vinda de baixo-esquerda -->
+        <light_source type="directional"
+                      I="1.0 0.45 0.05"
+                      scale="1.0 1.0 1.0"
+                      from="-8 0.5 2"
+                      to="0 0 0" />
+
+        <!-- Luz de preenchimento azul (céu oposto ao sol) -->
+        <light_source type="directional"
+                      I="0.2 0.3 0.6"
+                      scale="0.4 0.4 0.4"
+                      from="5 3 -3"
+                      to="0 0 0" />
+
+        <!-- Pedra: cinza-marrom, fosca -->
+        <make_named_material type="blinn" name="stone"
+            ambient="0.04 0.03 0.03"
+            diffuse="0.45 0.38 0.32"
+            specular="0.08 0.07 0.06"
+            glossiness="8" />
+
+        <!-- Metal enferrujado: laranja-marrom com leve brilho -->
+        <make_named_material type="blinn" name="rusty_metal"
+            ambient="0.05 0.02 0.01"
+            diffuse="0.55 0.22 0.08"
+            specular="0.3 0.15 0.05"
+            glossiness="24" />
+
+        <!-- Vidro verde: brilhante, specular alto -->
+        <make_named_material type="blinn" name="green_glass"
+            ambient="0.02 0.05 0.02"
+            diffuse="0.1 0.55 0.15"
+            specular="0.8 0.9 0.8"
+            glossiness="256" />
+
+        <!-- Bronze: dourado-esverdeado -->
+        <make_named_material type="blinn" name="bronze"
+            ambient="0.04 0.03 0.01"
+            diffuse="0.65 0.50 0.18"
+            specular="0.5 0.4 0.2"
+            glossiness="48" />
+
+        <!-- Esfera grande de pedra (centro) -->
+        <object type="sphere" radius="1.1"  center=" 0.0  0.0  0.0"  material="stone"       />
+        <!-- Esfera pequena de metal enferrujado -->
+        <object type="sphere" radius="0.55" center="-2.2  0.0  0.5"  material="rusty_metal" />
+        <!-- Esfera de vidro verde -->
+        <object type="sphere" radius="0.6"  center=" 2.3  0.0  0.3"  material="green_glass" />
+        <!-- Esfera de bronze no topo -->
+        <object type="sphere" radius="0.45" center=" 0.0  1.65 0.2"  material="bronze"      />
+
+        <!-- Chão: terra seca, avermelhada pela luz do pôr do sol -->
+        <make_named_material type="blinn" name="earth_ground"
+            ambient="0.04 0.02 0.01"
+            diffuse="0.42 0.25 0.10"
+            specular="0.05 0.04 0.03"
+            glossiness="4" />
+        <object type="sphere" radius="20.0" center="0.0 -21.1 0.0" material="earth_ground" />
+
+    <world_end/>
+</RT3>
