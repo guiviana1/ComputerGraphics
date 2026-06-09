@@ -11,15 +11,12 @@ DirectionalLight::DirectionalLight(const RGBColor& I, const RGBColor& scale,
     , world_radius(world_radius)
 {
 
-    // wi deve apontar do ponto da superficie PARA a luz, ou seja, o OPOSTO
-    // da direcao de propagacao (from -> to). Por isso usamos from - to.
+    // wi aponta do ponto para a luz, oposto a direcao de propagacao
     direction = normalize(from - to);
 }
 
 LightSample DirectionalLight::sample_Li(const Point3& /*hit_point*/) const {
-    // dist = world_radius: limite ate onde o raio de sombra e testado
-    // (a luz direcional esta "infinitamente" longe, mas o raio de sombra
-    //  precisa de um alcance finito para varrer a cena).
+    // dist = world_radius: alcance finito do raio de sombra
     return {
         direction,
         effective_I,
@@ -53,7 +50,7 @@ LightSample PointLight::sample_Li(const Point3& hit_point) const {
     return { wi, I_att, dist };
 }
 
-// ── Spotlight ──────────────────────────────────────────────────────────────
+// Spotlight
 SpotLight::SpotLight(const RGBColor& I, const RGBColor& scale,
                      const Point3& from, const Point3& to,
                      float cutoff_deg, float falloff_deg,
@@ -77,19 +74,16 @@ LightSample SpotLight::sample_Li(const Point3& hit_point) const {
 
     float att = 1.0f / (Kc + Kl * dist + Kq * dist * dist);
 
-    // Fator do cone: angulo entre o eixo do spot e a direcao luz->ponto.
-    // -wi e a direcao do ponto visto da luz (luz -> ponto).
+    // angulo entre o eixo do spot e a direcao luz->ponto
     float cos_angle = dot(spot_dir, -wi);
 
-    // Fator do cone. Quando cutoff == falloff nao existe zona de transicao:
-    // o spot tem BORDA DURA (intensidade total dentro do cone, zero fora).
-    // Tratamos esse caso a parte para evitar divisao por zero (que geraria NaN).
+    // fator do cone; quando cutoff == falloff a borda e dura (evita divisao por zero)
     float spot;
     float denom = cos_falloff - cos_cutoff;
     if (std::fabs(denom) < 1e-6f) {
         spot = (cos_angle >= cos_cutoff) ? 1.0f : 0.0f;   // borda dura
     } else {
-        // Interpola linearmente entre o cone externo (0) e o interno (1).
+        // interpola linearmente entre o cone externo (0) e o interno (1)
         float t = (cos_angle - cos_cutoff) / denom;
         spot = std::max(0.0f, std::min(1.0f, t));
     }

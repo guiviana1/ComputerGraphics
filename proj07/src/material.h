@@ -26,7 +26,7 @@ private:
     RGBColor kd_;         // coeficiente difuso
     RGBColor ks_;         // coeficiente especular
     float    glossiness_; // expoente g
-    RGBColor km_;         // coeficiente espelho (mirror) — proj06
+    RGBColor km_;         // coeficiente espelho (mirror)
 
 public:
     BlinnPhongMaterial(const RGBColor& ka, const RGBColor& kd,

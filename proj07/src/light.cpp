@@ -53,7 +53,7 @@ LightSample PointLight::sample_Li(const Point3& hit_point) const {
     return { wi, I_att, dist };
 }
 
-// ── Spotlight ──────────────────────────────────────────────────────────────
+// Spotlight
 SpotLight::SpotLight(const RGBColor& I, const RGBColor& scale,
                      const Point3& from, const Point3& to,
                      float cutoff_deg, float falloff_deg,

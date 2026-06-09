@@ -45,8 +45,7 @@ inline Vector3 cross(const Vector3& a, const Vector3& b) {
     };
 }
 
-// Reflexao do vetor d em torno da normal n (ambos no mesmo lado).
-// r = d - 2*(d . n)*n   (formula classica da reflexao especular ideal)
+// reflexao do vetor d em torno da normal n
 inline Vector3 reflect(const Vector3& d, const Vector3& n) {
     return d - n * (2.0f * dot(d, n));
 }

@@ -35,8 +35,7 @@ void API::run() {
         } else if (data.integrator_type == "blinnphong" ||
                    data.integrator_type == "blinn_phong" ||
                    data.integrator_type == "blinn-phong") {
-            // Novo integrador: implementa Blinn-Phong Reflection Model.
-            // Aceita as variacoes de nome usadas nos arquivos de cena.
+            // integrador Blinn-Phong (aceita variacoes de nome)
             integrator = std::make_shared<BlinnPhongIntegrator>(
                 data.camera, film, data.integrator_depth);
 

@@ -27,8 +27,7 @@ static RGBColor colorClamp255(const RGBColor& c) {
     return RGBColor(cl(c.r), cl(c.g), cl(c.b));
 }
 
-// Mapeia uma direcao 3D para coordenadas (u,v) equiretangulares, usadas para
-// amostrar o background quando um raio secundario (reflexao) nao acerta nada.
+// mapeia uma direcao 3D para coordenadas (u,v) equiretangulares do background
 static void dirToUV(const Vector3& d, float& u, float& v) {
     Vector3 n = normalize(d);
     const float PI = 3.14159265358979f;
@@ -36,8 +35,7 @@ static void dirToUV(const Vector3& d, float& u, float& v) {
     v = 0.5f - std::asin(std::max(-1.0f, std::min(1.0f, n.y))) / PI;
 }
 
-// Epsilon para afastar a origem dos raios secundarios da superficie,
-// evitando que o raio re-acerte a propria face (auto-intersecao).
+// epsilon para afastar raios secundarios da superficie e evitar auto-intersecao
 static const float RAY_EPS = 1e-3f;
 
 void SamplerIntegrator::render(const Scene& scene) {
@@ -77,7 +75,7 @@ std::optional<RGBColor> RayCastIntegrator::Li(const Ray& ray, const Scene& scene
 
     return fm->kd();
 }
-//*
+
 std::optional<RGBColor> BlinnPhongIntegrator::Li(const Ray& ray, const Scene& scene,
                                                  int depth) const {
 
@@ -116,8 +114,7 @@ std::optional<RGBColor> BlinnPhongIntegrator::Li(const Ray& ray, const Scene& sc
         Vector3  wi = ls.wi;    // l̂: direção normalizada PARA a luz
         RGBColor Ii = ls.intensity;     // intensidade efetiva (já com scale/att)
 
-        // ── SOMBRA: dispara um raio de sombra de sf.p ate a luz. Se algo
-        //    bloqueia, esta luz nao contribui (difuso + especular pulados).
+        // sombra: se o raio ate a luz estiver bloqueado, esta luz nao contribui
         VisibilityTester vis(sf.p, N, wi, ls.dist);
         if (!vis.unoccluded(scene))
             continue;
@@ -142,9 +139,7 @@ std::optional<RGBColor> BlinnPhongIntegrator::Li(const Ray& ray, const Scene& sc
     // Cor local do Blinn-Phong, ja no espaco de exibicao [0,255].
     RGBColor L255 = colorClamp255(colorScale(L, 255.0f));
 
-    // ── REFLEXAO ESPELHO (proj06) ──────────────────────────────────────────
-    // Se o material reflete e ainda nao atingimos a profundidade maxima,
-    // seguimos o raio refletido na cena e somamos km * cor_refletida.
+    // reflexao espelho: segue o raio refletido e soma km * cor_refletida
     if (mat->is_mirror() && depth < max_depth) {
         Vector3 d    = normalize(r.d);            // direcao incidente
         Vector3 refl = reflect(d, N);             // reflexao perfeita sobre N

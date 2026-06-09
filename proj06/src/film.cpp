@@ -8,9 +8,7 @@ Film::Film(int w, int h, std::string fname, bool gamma_corrected)
       filename(std::move(fname)), gamma_corrected(gamma_corrected)
 {}
 
-// Codifica um canal linear (em [0,255]) para o espaco de exibicao.
-// Se gamma estiver ligado, aplica (v/255)^(1/2.2) * 255; caso contrario
-// apenas faz o clamp e arredonda.
+// codifica um canal linear para o espaco de exibicao, com gamma opcional
 static int encode_channel(float v, bool gamma) {
     float n = std::max(0.0f, std::min(1.0f, v / 255.0f));   // normaliza e satura em [0,1]
     if (gamma)

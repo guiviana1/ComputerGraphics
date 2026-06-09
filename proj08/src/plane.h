@@ -7,8 +7,8 @@
 // Plano infinito definido por um ponto e uma normal.
 class Plane : public Primitive {
 private:
-    Point3  point;   //!< Um ponto qualquer pertencente ao plano.
-    Vector3 normal;  //!< Normal do plano (normalizada).
+    Point3  point;   // Um ponto qualquer pertencente ao plano.
+    Vector3 normal;  // Normal do plano (normalizada).
 
 public:
     Plane(const Point3& point, const Vector3& normal, std::shared_ptr<Material> mat);

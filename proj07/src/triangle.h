@@ -7,39 +7,27 @@
 #include <memory>
 #include <string>
 
-// ─────────────────────────────────────────────────────────────────────────────
-// TriangleMesh — o "banco de dados" compartilhado de uma malha (proj07).
-//
-// Usa a abordagem de *Indexed Triangle List*: em vez de cada triangulo guardar
-// uma copia dos seus vertices/normais/uvs, guardamos UMA lista de cada dado e os
-// triangulos referenciam-nos por indice. Isso evita replicacao (vertices sao
-// compartilhados por varios triangulos).
-//
-// As listas de indices tem tamanho 3 * n_triangles (3 indices por triangulo).
-// ─────────────────────────────────────────────────────────────────────────────
+// Malha de triangulos compartilhada: listas de vertices/normais/uvs referenciadas por indice.
 struct TriangleMesh {
     int n_triangles = 0;
 
-    std::vector<int> vertex_indices;  //!< indices na lista 'points'  (3 por triangulo)
-    std::vector<int> normal_indices;  //!< indices na lista 'normals' (3 por triangulo)
-    std::vector<int> uv_indices;      //!< indices na lista 'uvs'     (3 por triangulo)
+    std::vector<int> vertex_indices;  // indices na lista 'points'  (3 por triangulo)
+    std::vector<int> normal_indices;  // indices na lista 'normals' (3 por triangulo)
+    std::vector<int> uv_indices;      // indices na lista 'uvs'     (3 por triangulo)
 
-    std::vector<Point3>  points;      //!< coordenadas 3D dos vertices
-    std::vector<Vector3> normals;     //!< normais (podem nao estar normalizadas)
-    std::vector<Point2f> uvs;         //!< coordenadas de textura (u,v)
+    std::vector<Point3>  points;      // coordenadas 3D dos vertices
+    std::vector<Vector3> normals;     // normais (podem nao estar normalizadas)
+    std::vector<Point2f> uvs;         // coordenadas de textura (u,v)
 };
 
-// ─────────────────────────────────────────────────────────────────────────────
-// Triangle — um triangulo individual. NAO guarda dados geometricos: apenas um
-// ponteiro para a malha e os indices dos seus 3 vertices/normais/uvs.
-// ─────────────────────────────────────────────────────────────────────────────
+// Triangulo individual: aponta para a malha e guarda os indices dos seus 3 vertices.
 class Triangle : public Primitive {
 private:
     std::shared_ptr<TriangleMesh> mesh;
-    int v[3];               //!< indices dos vertices na lista mesh->points
-    int n[3];               //!< indices das normais na lista mesh->normals (-1 = sem)
-    int uv[3];              //!< indices das uvs na lista mesh->uvs (-1 = sem)
-    bool backface_cull;     //!< se true, ignora a face de tras
+    int v[3];               // indices dos vertices na lista mesh->points
+    int n[3];               // indices das normais na lista mesh->normals (-1 = sem)
+    int uv[3];              // indices das uvs na lista mesh->uvs (-1 = sem)
+    bool backface_cull;     // se true, ignora a face de tras
 
 public:
     Triangle(std::shared_ptr<TriangleMesh> mesh, int tri_index,
@@ -55,12 +43,7 @@ private:
                          bool cull) const;
 };
 
-// ─────────────────────────────────────────────────────────────────────────────
-// create_triangle_mesh — cria a malha permanente e um Triangle por face.
-// Devolve a lista de primitivas (triangulos) para o cliente (o parser).
-// Se compute_normals==true (ou a malha nao tem normais), calcula a normal
-// geometrica de cada face. Se a malha nao tem uvs, usa (0,0).
-// ─────────────────────────────────────────────────────────────────────────────
+// Cria a malha e um Triangle por face, devolvendo a lista de primitivas.
 std::vector<std::shared_ptr<Primitive>>
 create_triangle_mesh(std::shared_ptr<TriangleMesh> mesh,
                      std::shared_ptr<Material>     material,

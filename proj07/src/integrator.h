@@ -27,7 +27,7 @@ public:
 
     virtual ~SamplerIntegrator() = default;
 
-    // depth: nivel de recursao atual (usado pela reflexao espelho — proj06)
+    // depth: nivel de recursao atual (usado pela reflexao espelho)
     virtual std::optional<RGBColor> Li(const Ray& ray, const Scene& scene,
                                        int depth = 0) const = 0;
 
@@ -49,7 +49,7 @@ public:
 
 class BlinnPhongIntegrator : public SamplerIntegrator {
 private:
-    int max_depth;   //!< niveis maximos de recursao para a reflexao espelho
+    int max_depth;   // niveis maximos de recursao para a reflexao espelho
 
 public:
     BlinnPhongIntegrator(std::shared_ptr<Camera> cam, std::shared_ptr<Film> f,

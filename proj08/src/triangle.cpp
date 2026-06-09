@@ -5,8 +5,6 @@
 #include <sstream>
 #include <array>
 
-// ── Triangle ─────────────────────────────────────────────────────────────────
-
 Bounds3f Triangle::world_bound() const {
     const Point3& p0 = mesh->points[v[0]];
     const Point3& p1 = mesh->points[v[1]];
@@ -113,8 +111,6 @@ bool Triangle::intersect_p(const Ray& r) const {
     return moller_trumbore(r, t, b1, b2, /*cull=*/false);
 }
 
-// ── create_triangle_mesh ─────────────────────────────────────────────────────
-
 std::vector<std::shared_ptr<Primitive>>
 create_triangle_mesh(std::shared_ptr<TriangleMesh> mesh,
                      std::shared_ptr<Material>     material,
@@ -165,7 +161,7 @@ create_triangle_mesh(std::shared_ptr<TriangleMesh> mesh,
     return tris;
 }
 
-// ── Leitor de .obj ───────────────────────────────────────────────────────────
+// Leitor de .obj
 
 // Converte um indice do OBJ (1-based; negativo conta do fim) para 0-based.
 static int objIndex(int raw, int count) {

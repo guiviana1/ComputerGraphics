@@ -5,9 +5,7 @@
 bool Scene::intersect(Ray& r, Surfel* sf) const {
     bool hit_anything = false;
 
-    // Iteramos sobre todos os objetos.
-    // A cada hit, r.t_max e atualizado pelo proprio Primitive::intersect(),
-    // garantindo que ao fim da iteracao sf contem o hit MAIS PROXIMO.
+    // a cada hit r.t_max e atualizado, deixando em sf o hit mais proximo
     for (const auto& prim : primitives) {
         if (prim->intersect(r, sf))
             hit_anything = true;
@@ -25,16 +23,13 @@ bool Scene::intersect_p(const Ray& r) const {
 }
 
 bool VisibilityTester::unoccluded(const Scene& scene) const {
-    // Para evitar "auto-sombra" (shadow acne) por erro de arredondamento,
-    // deslocamos a origem do raio de sombra um pouco ao longo da normal,
-    // tirando-a de cima da superficie antes de mira-la para a luz.
+    // desloca a origem ao longo da normal para evitar auto-sombra (shadow acne)
     const float eps = 1e-2f;
     Point3 origin = p0 + n * eps;
 
-    // Raio de sombra: de origin em direcao a luz, valido em [0, dist-eps].
-    // O limite superior garante que objetos ALEM da luz nao contem como bloqueio.
+    // raio de sombra ate a luz, valido em [0, dist-eps]
     Ray shadow(origin, wi, 0.0f, dist - eps);
 
-    // Se algo intercepta nesse intervalo, o ponto esta na sombra desta luz.
+    // se algo intercepta nesse intervalo, o ponto esta na sombra
     return !scene.intersect_p(shadow);
 }

@@ -6,8 +6,8 @@
 
 class Sphere : public Primitive {
 private:
-    Point3    center; //!< Centro da esfera no espaco do mundo.
-    real_type radius; //!< Raio da esfera.
+    Point3    center; // centro da esfera no espaco do mundo
+    real_type radius; // raio da esfera
 
 public:
     Sphere(const Point3& center, real_type radius, std::shared_ptr<Material> mat);

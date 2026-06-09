@@ -12,7 +12,7 @@
 #include <algorithm>
 #include <map>
 
-// ── Utilitários de arquivo ────────────────────────────────────────────────────
+// Utilitarios de arquivo
 
 static std::string readFile(const std::string& path) {
     std::ifstream f(path);
@@ -28,12 +28,10 @@ static std::string dirOf(const std::string& path) {
     return (last == std::string::npos) ? "." : path.substr(0, last);
 }
 
-// ── Helpers de extração ───────────────────────────────────────────────────────
+// Helpers de extracao
 
 std::string Parser::extractAttr(const std::string& text, const std::string& attr) {
-    // Procura o atributo tolerando espacos ao redor do '=' (ex.: glossiness ="256")
-    // e exigindo uma fronteira de palavra antes do nome (evita casar substrings,
-    // p.ex. "from" dentro de "look_from").
+    // Procura o atributo tolerando espacos ao redor do '=' e exigindo fronteira de palavra.
     auto is_ws = [](char c) { return std::isspace(static_cast<unsigned char>(c)) != 0; };
 
     size_t pos = 0;
@@ -70,7 +68,7 @@ std::string Parser::tagName(const std::string& tag) {
     return tag.substr(start, end - start);
 }
 
-// ── Helpers de parse ──────────────────────────────────────────────────────────
+// Helpers de parse
 
 RGBColor Parser::parseColor(const std::string& s) {
     std::istringstream ss(s);
@@ -111,7 +109,7 @@ static std::vector<int> parseIntArray(const std::string& s) {
     return out;
 }
 
-// ── Include ───────────────────────────────────────────────────────────────────
+// Include
 
 std::string Parser::processIncludes(const std::string& xml, const std::string& basedir) {
     std::string result = xml;
@@ -127,7 +125,7 @@ std::string Parser::processIncludes(const std::string& xml, const std::string& b
     return result;
 }
 
-// ── Construção de câmera ──────────────────────────────────────────────────────
+// Construcao de camera
 
 std::shared_ptr<Camera> Parser::buildCamera(
     const Point3& look_from, const Point3& look_at, const Vector3& vup,
@@ -171,7 +169,7 @@ std::shared_ptr<Camera> Parser::buildCamera(
     }
 }
 
-// ── Parse principal ───────────────────────────────────────────────────────────
+// Parse principal
 
 std::vector<SceneData> Parser::parse(const std::string& filepath) {
     std::string basedir = dirOf(filepath);
@@ -223,7 +221,7 @@ std::vector<SceneData> Parser::parse(const std::string& filepath) {
 
         std::string name = tagName(tag);
 
-        // ── Tags globais ──────────────────────────────────────────────────────
+        // Tags globais
         if (name == "lookat") {
             look_from = parsePoint3 (extractAttr(tag, "look_from"));
             look_at   = parsePoint3 (extractAttr(tag, "look_at"));
@@ -247,7 +245,7 @@ std::vector<SceneData> Parser::parse(const std::string& filepath) {
                                    extractIntOpt(tag, "max_depth", 1));
         }
 
-        // ── Início do mundo ───────────────────────────────────────────────────
+        // Inicio do mundo
         else if (name == "world_begin") {
             in_world = true;
             primitives.clear();
@@ -257,19 +255,14 @@ std::vector<SceneData> Parser::parse(const std::string& filepath) {
             current_material.reset();
         }
 
-        // ── Tags dentro do mundo ──────────────────────────────────────────────
+        // Tags dentro do mundo
         else if (in_world) {
 
-            // ── Background ───────────────────────────────────────────────────
+            // Background
             if (name == "background") {
                 std::string btype = extractAttr(tag, "type");
 
-                // O renderizador trabalha com cores de background em [0,255].
-                // Mas algumas cenas declaram em [0,1]. O atributo 'normalized'
-                // controla isso:
-                //   normalized="true"  -> cores em [0,1], multiplica por 255
-                //   normalized="false" -> cores em [0,255] (padrao historico)
-                //   ausente            -> auto-detecta (se todo canal <= 1, e [0,1])
+                // O atributo 'normalized' indica se as cores estao em [0,1] (multiplica por 255) ou [0,255].
                 std::string nrm = extractAttr(tag, "normalized");
                 auto rescale = [&](std::vector<RGBColor> cols) {
                     bool normalized;
@@ -304,7 +297,7 @@ std::vector<SceneData> Parser::parse(const std::string& filepath) {
                 }
             }
 
-            // ── Materiais inline ─────────────────────────────────────────────
+            // Materiais inline
             else if (name == "material") {
                 std::string mtype = extractAttr(tag, "type");
                 if (mtype == "flat") {
@@ -323,11 +316,7 @@ std::vector<SceneData> Parser::parse(const std::string& filepath) {
                 }
             }
 
-            // ── Materiais nomeados ────────────────────────────────────────────
-            // Formato do README:
-            //   <make_named_material type="blinn" name="gold"
-            //       ambient="0.2 0.2 0.2" diffuse="1 0.65 0.0"
-            //       specular="0.8 0.6 0.2" glossiness="256"/>
+            // Materiais nomeados
             else if (name == "make_named_material") {
                 std::string mname = extractAttr(tag, "name");
                 std::string mtype = extractAttr(tag, "type");
@@ -346,7 +335,7 @@ std::vector<SceneData> Parser::parse(const std::string& filepath) {
                 }
             }
 
-            // ── Referência a material nomeado ─────────────────────────────────
+            // Referencia a material nomeado
             else if (name == "named_material") {
                 std::string mname = extractAttr(tag, "name");
                 auto it = named_materials.find(mname);
@@ -356,7 +345,7 @@ std::vector<SceneData> Parser::parse(const std::string& filepath) {
                     throw std::runtime_error("Parser: material nomeado nao encontrado: " + mname);
             }
 
-            // ── Objetos ───────────────────────────────────────────────────────
+            // Objetos
             else if (name == "object") {
                 if (!current_material)
                     current_material = std::make_shared<FlatMaterial>(RGBColor(1.0f, 1.0f, 1.0f));
@@ -376,14 +365,14 @@ std::vector<SceneData> Parser::parse(const std::string& filepath) {
                     primitives.push_back(
                         std::make_shared<Sphere>(center, radius, obj_material));
                 }
-                // ── Plano infinito ────────────────────────────────────────────
+                // Plano infinito
                 else if (otype == "plane") {
                     Point3  p = parsePoint3 (extractAttr(tag, "point"));
                     Vector3 n = parseVector3(extractAttr(tag, "normal"));
                     primitives.push_back(
                         std::make_shared<Plane>(p, n, obj_material));
                 }
-                // ── Malha de triangulos (proj07) ──────────────────────────────
+                // Malha de triangulos
                 else if (otype == "trianglemesh") {
                     auto mesh = std::make_shared<TriangleMesh>();
 
@@ -420,12 +409,7 @@ std::vector<SceneData> Parser::parse(const std::string& filepath) {
                         mesh->n_triangles = extractIntOpt(tag, "ntriangles",
                                                 (int)mesh->vertex_indices.size() / 3);
 
-                        // Se vieram 'normals' SEM 'normal_indices' e o numero de
-                        // normais bate com o de vertices, assumimos normais por
-                        // vertice (normal_indices = vertex_indices). Sem isso, as
-                        // normais fornecidas seriam ignoradas e calculariamos a
-                        // normal geometrica — que pode apontar para o lado errado
-                        // (depende do winding) e deixar a face invisivel.
+                        // Se vieram 'normals' sem 'normal_indices' e batem com os vertices, usa normais por vertice.
                         if (mesh->normal_indices.empty() && !mesh->normals.empty()
                             && mesh->normals.size() == mesh->points.size()) {
                             mesh->normal_indices = mesh->vertex_indices;
@@ -439,20 +423,11 @@ std::vector<SceneData> Parser::parse(const std::string& filepath) {
                 }
             }
 
-            // ── Fontes de luz ─────────────────────────────────────────────────
-            // Formato do README:
-            //   <light_source type="ambient"     I="0.1 0.1 0.1" scale="1 1 1" />
-            //   <light_source type="directional" I="0.9 0.9 0.9" scale="0.4 0.4 0.4"
-            //                                    from="1 0.8 -1" to="0 0 1" />
-            //   <light_source type="point"       I="0.95 0.9 0.8" scale="0.4 0.4 0.4"
-            //                                    from="0.1 3.0 1" />
-            //   <light_source type="point"       I="..." scale="..."
-            //                                    from="..."
-            //                                    attenuation="1.0 0.22 0.20" />
+            // Fontes de luz
             else if (name == "light_source") {
                 std::string ltype = extractAttr(tag, "type");
 
-                // Intensidade e scale (ambos em [0,1]). Aceita "I" ou o alias "L".
+                // Intensidade e scale. Aceita "I" ou o alias "L".
                 std::string I_str = extractAttr(tag, "I");
                 if (I_str.empty()) I_str = extractAttr(tag, "L");
                 RGBColor I     = parseColor(I_str);
@@ -490,11 +465,7 @@ std::vector<SceneData> Parser::parse(const std::string& filepath) {
                         std::make_shared<PointLight>(I, scale, from, kc, kl, kq));
 
                 } else if (ltype == "spot") {
-                    // Spotlight (proj06): luz pontual com cone de influencia.
-                    //   from   = posicao da luz
-                    //   to     = ponto para onde o cone aponta
-                    //   cutoff = angulo externo (graus) — onde a luz zera
-                    //   falloff= angulo interno (graus) — onde a luz e total
+                    // Spotlight: luz pontual com cone (cutoff externo, falloff interno).
                     Point3 from   = parsePoint3(extractAttr(tag, "from"));
                     Point3 to     = parsePoint3(extractAttr(tag, "to"));
                     float  cutoff  = std::stof(extractAttr(tag, "cutoff"));
@@ -517,7 +488,7 @@ std::vector<SceneData> Parser::parse(const std::string& filepath) {
                 }
             }
 
-            // ── Fim do mundo ─────────────────────────────────────────────────
+            // Fim do mundo
             else if (name == "world_end") {
                 in_world  = false;
                 has_world = true;
@@ -539,7 +510,7 @@ std::vector<SceneData> Parser::parse(const std::string& filepath) {
             }
         }
 
-        // ── Render again ──────────────────────────────────────────────────────
+        // Render again
         else if (name == "render_again" && has_world) {
             SceneData data;
             data.camera           = buildCamera(look_from, look_at, vup,

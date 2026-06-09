@@ -19,7 +19,7 @@ bool Scene::intersect(Ray& r, Surfel* sf) const {
 bool Scene::intersect_p(const Ray& r) const {
     for (const auto& prim : primitives) {
         if (prim->intersect_p(r))
-            return true; // Para no primeiro hit — nao precisamos do mais proximo
+            return true; // Para no primeiro hit, nao precisamos do mais proximo
     }
     return false;
 }

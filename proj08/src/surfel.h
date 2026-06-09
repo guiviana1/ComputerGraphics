@@ -12,12 +12,12 @@ struct Point2f {
 class Primitive; //será usada como ponteiro
 
 struct Surfel {
-    Point3  p;          //!< Ponto de contato no espaco 3D.
-    Vector3 n;          //!< Normal da superficie no ponto de contato.
-    Vector3 wo;         //!< Direcao de saida da luz: equivale a -ray.d (raio invertido).
-    float   time;       //!< Tempo do hit (relevante para motion blur no futuro).
-    Point2f uv;         //!< Coordenadas parametricas (u,v) do ponto na superficie.
-    const Primitive* primitive = nullptr; //!< Ponteiro para a primitiva atingida.
+    Point3  p;          // Ponto de contato no espaco 3D.
+    Vector3 n;          // Normal da superficie no ponto de contato.
+    Vector3 wo;         // Direcao de saida da luz: equivale a -ray.d (raio invertido).
+    float   time;       // Tempo do hit (relevante para motion blur no futuro).
+    Point2f uv;         // Coordenadas parametricas (u,v) do ponto na superficie.
+    const Primitive* primitive = nullptr; // Ponteiro para a primitiva atingida.
 
     Surfel() : time(0) {}
 

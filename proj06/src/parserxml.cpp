@@ -8,8 +8,7 @@
 #include <cctype>
 #include <map>
 
-// ── Utilitários de arquivo ────────────────────────────────────────────────────
-
+// Utilitarios de arquivo
 static std::string readFile(const std::string& path) {
     std::ifstream f(path);
     if (!f.is_open())
@@ -24,12 +23,9 @@ static std::string dirOf(const std::string& path) {
     return (last == std::string::npos) ? "." : path.substr(0, last);
 }
 
-// ── Helpers de extração ───────────────────────────────────────────────────────
-
+// Helpers de extracao
 std::string Parser::extractAttr(const std::string& text, const std::string& attr) {
-    // Procura o atributo tolerando espacos ao redor do '=' (ex.: glossiness ="256")
-    // e exigindo uma fronteira de palavra antes do nome (evita casar substrings,
-    // p.ex. "from" dentro de "look_from").
+    // procura o atributo tolerando espacos ao redor do '=' e exigindo fronteira de palavra
     auto is_ws = [](char c) { return std::isspace(static_cast<unsigned char>(c)) != 0; };
 
     size_t pos = 0;
@@ -66,8 +62,7 @@ std::string Parser::tagName(const std::string& tag) {
     return tag.substr(start, end - start);
 }
 
-// ── Helpers de parse ──────────────────────────────────────────────────────────
-
+// Helpers de parse
 RGBColor Parser::parseColor(const std::string& s) {
     std::istringstream ss(s);
     float r, g, b;
@@ -89,8 +84,7 @@ Vector3 Parser::parseVector3(const std::string& s) {
     return Vector3(x, y, z);
 }
 
-// ── Include ───────────────────────────────────────────────────────────────────
-
+// Include
 std::string Parser::processIncludes(const std::string& xml, const std::string& basedir) {
     std::string result = xml;
     size_t pos = 0;
@@ -105,8 +99,7 @@ std::string Parser::processIncludes(const std::string& xml, const std::string& b
     return result;
 }
 
-// ── Construção de câmera ──────────────────────────────────────────────────────
-
+// Construcao de camera
 std::shared_ptr<Camera> Parser::buildCamera(
     const Point3& look_from, const Point3& look_at, const Vector3& vup,
     const std::string& cam_tag, const std::string& cam_type,
@@ -149,8 +142,7 @@ std::shared_ptr<Camera> Parser::buildCamera(
     }
 }
 
-// ── Parse principal ───────────────────────────────────────────────────────────
-
+// Parse principal
 std::vector<SceneData> Parser::parse(const std::string& filepath) {
     std::string xml = processIncludes(readFile(filepath), dirOf(filepath));
 
@@ -200,7 +192,7 @@ std::vector<SceneData> Parser::parse(const std::string& filepath) {
 
         std::string name = tagName(tag);
 
-        // ── Tags globais ──────────────────────────────────────────────────────
+        // Tags globais
         if (name == "lookat") {
             look_from = parsePoint3 (extractAttr(tag, "look_from"));
             look_at   = parsePoint3 (extractAttr(tag, "look_at"));
@@ -219,12 +211,12 @@ std::vector<SceneData> Parser::parse(const std::string& filepath) {
         }
         else if (name == "integrator") {
             integrator_type = extractAttr(tag, "type");
-            // profundidade maxima da reflexao espelho: aceita "depth" ou "max_depth"
+            // profundidade maxima da reflexao espelho (depth ou max_depth)
             integrator_depth = extractIntOpt(tag, "depth",
                                    extractIntOpt(tag, "max_depth", 1));
         }
 
-        // ── Início do mundo ───────────────────────────────────────────────────
+        // Inicio do mundo
         else if (name == "world_begin") {
             in_world = true;
             primitives.clear();
@@ -234,10 +226,10 @@ std::vector<SceneData> Parser::parse(const std::string& filepath) {
             current_material.reset();
         }
 
-        // ── Tags dentro do mundo ──────────────────────────────────────────────
+        // Tags dentro do mundo
         else if (in_world) {
 
-            // ── Background ───────────────────────────────────────────────────
+            // Background
             if (name == "background") {
                 std::string btype = extractAttr(tag, "type");
                 if (btype == "colors" || btype == "4_colors") {
@@ -255,30 +247,25 @@ std::vector<SceneData> Parser::parse(const std::string& filepath) {
                 }
             }
 
-            // ── Materiais inline ─────────────────────────────────────────────
+            // Materiais inline
             else if (name == "material") {
                 std::string mtype = extractAttr(tag, "type");
                 if (mtype == "flat") {
                     current_material = std::make_shared<FlatMaterial>(
                         parseColor(extractAttr(tag, "color")));
                 } else if (mtype == "blinn") {
-                    // Material Blinn-Phong inline (sem nome)
                     RGBColor ka  = parseColor(extractAttr(tag, "ambient"));
                     RGBColor kd  = parseColor(extractAttr(tag, "diffuse"));
                     RGBColor ks  = parseColor(extractAttr(tag, "specular"));
                     float    g   = std::stof(extractAttr(tag, "glossiness"));
-                    // mirror e opcional: ausente => (0,0,0) (sem reflexao)
+                    // mirror e opcional: ausente => sem reflexao
                     std::string mir = extractAttr(tag, "mirror");
                     RGBColor km  = mir.empty() ? RGBColor(0,0,0) : parseColor(mir);
                     current_material = std::make_shared<BlinnPhongMaterial>(ka, kd, ks, g, km);
                 }
             }
 
-            // ── Materiais nomeados ────────────────────────────────────────────
-            // Formato do README:
-            //   <make_named_material type="blinn" name="gold"
-            //       ambient="0.2 0.2 0.2" diffuse="1 0.65 0.0"
-            //       specular="0.8 0.6 0.2" glossiness="256"/>
+            // Materiais nomeados
             else if (name == "make_named_material") {
                 std::string mname = extractAttr(tag, "name");
                 std::string mtype = extractAttr(tag, "type");
@@ -290,14 +277,14 @@ std::vector<SceneData> Parser::parse(const std::string& filepath) {
                     RGBColor kd = parseColor(extractAttr(tag, "diffuse"));
                     RGBColor ks = parseColor(extractAttr(tag, "specular"));
                     float    g  = std::stof(extractAttr(tag, "glossiness"));
-                    // mirror e opcional: ausente => (0,0,0) (sem reflexao)
+                    // mirror e opcional: ausente => sem reflexao
                     std::string mir = extractAttr(tag, "mirror");
                     RGBColor km = mir.empty() ? RGBColor(0,0,0) : parseColor(mir);
                     named_materials[mname] = std::make_shared<BlinnPhongMaterial>(ka, kd, ks, g, km);
                 }
             }
 
-            // ── Referência a material nomeado ─────────────────────────────────
+            // Referencia a material nomeado
             else if (name == "named_material") {
                 std::string mname = extractAttr(tag, "name");
                 auto it = named_materials.find(mname);
@@ -307,7 +294,7 @@ std::vector<SceneData> Parser::parse(const std::string& filepath) {
                     throw std::runtime_error("Parser: material nomeado nao encontrado: " + mname);
             }
 
-            // ── Objetos ───────────────────────────────────────────────────────
+            // Objetos
             else if (name == "object") {
                 if (!current_material)
                     current_material = std::make_shared<FlatMaterial>(RGBColor(1.0f, 1.0f, 1.0f));
@@ -329,20 +316,11 @@ std::vector<SceneData> Parser::parse(const std::string& filepath) {
                 }
             }
 
-            // ── Fontes de luz ─────────────────────────────────────────────────
-            // Formato do README:
-            //   <light_source type="ambient"     I="0.1 0.1 0.1" scale="1 1 1" />
-            //   <light_source type="directional" I="0.9 0.9 0.9" scale="0.4 0.4 0.4"
-            //                                    from="1 0.8 -1" to="0 0 1" />
-            //   <light_source type="point"       I="0.95 0.9 0.8" scale="0.4 0.4 0.4"
-            //                                    from="0.1 3.0 1" />
-            //   <light_source type="point"       I="..." scale="..."
-            //                                    from="..."
-            //                                    attenuation="1.0 0.22 0.20" />
+            // Fontes de luz
             else if (name == "light_source") {
                 std::string ltype = extractAttr(tag, "type");
 
-                // Intensidade e scale (ambos em [0,1])
+                // intensidade e scale (ambos em [0,1])
                 RGBColor I     = parseColor(extractAttr(tag, "I"));
                 std::string sc = extractAttr(tag, "scale");
                 RGBColor scale = sc.empty()
@@ -350,13 +328,13 @@ std::vector<SceneData> Parser::parse(const std::string& filepath) {
                     : parseColor(sc);
 
                 if (ltype == "ambient") {
-                    // Só deve existir uma ambient por cena
+                    // so deve existir uma ambient por cena
                     ambient_light = std::make_shared<AmbientLight>(I, scale);
 
                 } else if (ltype == "directional") {
                     Point3 from = parsePoint3(extractAttr(tag, "from"));
                     Point3 to   = parsePoint3(extractAttr(tag, "to"));
-                    // world_radius opcional: alcance do raio de sombra (default grande)
+                    // world_radius opcional: alcance do raio de sombra
                     std::string wr = extractAttr(tag, "world_radius");
                     float world_radius = wr.empty() ? 1.0e6f : std::stof(wr);
                     lights.push_back(
@@ -365,8 +343,7 @@ std::vector<SceneData> Parser::parse(const std::string& filepath) {
                 } else if (ltype == "point") {
                     Point3 from = parsePoint3(extractAttr(tag, "from"));
 
-                    // Atenuação: optional. Formato: "Kc Kl Kq"
-                    // Sem atenuação: Kc=1, Kl=0, Kq=0
+                    // atenuacao opcional no formato "Kc Kl Kq"
                     float kc = 1.0f, kl = 0.0f, kq = 0.0f;
                     std::string att = extractAttr(tag, "attenuation");
                     if (!att.empty()) {
@@ -378,11 +355,7 @@ std::vector<SceneData> Parser::parse(const std::string& filepath) {
                         std::make_shared<PointLight>(I, scale, from, kc, kl, kq));
 
                 } else if (ltype == "spot") {
-                    // Spotlight (proj06): luz pontual com cone de influencia.
-                    //   from   = posicao da luz
-                    //   to     = ponto para onde o cone aponta
-                    //   cutoff = angulo externo (graus) — onde a luz zera
-                    //   falloff= angulo interno (graus) — onde a luz e total
+                    // spotlight: luz pontual com cone de influencia
                     Point3 from   = parsePoint3(extractAttr(tag, "from"));
                     Point3 to     = parsePoint3(extractAttr(tag, "to"));
                     float  cutoff  = std::stof(extractAttr(tag, "cutoff"));
@@ -405,7 +378,7 @@ std::vector<SceneData> Parser::parse(const std::string& filepath) {
                 }
             }
 
-            // ── Fim do mundo ─────────────────────────────────────────────────
+            // Fim do mundo
             else if (name == "world_end") {
                 in_world  = false;
                 has_world = true;
@@ -427,7 +400,7 @@ std::vector<SceneData> Parser::parse(const std::string& filepath) {
             }
         }
 
-        // ── Render again ──────────────────────────────────────────────────────
+        // Render again
         else if (name == "render_again" && has_world) {
             SceneData data;
             data.camera           = buildCamera(look_from, look_at, vup,

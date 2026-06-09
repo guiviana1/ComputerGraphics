@@ -5,8 +5,6 @@
 #include <sstream>
 #include <array>
 
-// ── Triangle ─────────────────────────────────────────────────────────────────
-
 Triangle::Triangle(std::shared_ptr<TriangleMesh> mesh, int tri_index,
                    bool reverse_orientation, bool backface_cull)
     : Primitive(nullptr)            // material e injetado por create_triangle_mesh
@@ -106,8 +104,6 @@ bool Triangle::intersect_p(const Ray& r) const {
     return moller_trumbore(r, t, b1, b2, /*cull=*/false);
 }
 
-// ── create_triangle_mesh ─────────────────────────────────────────────────────
-
 std::vector<std::shared_ptr<Primitive>>
 create_triangle_mesh(std::shared_ptr<TriangleMesh> mesh,
                      std::shared_ptr<Material>     material,
@@ -158,7 +154,7 @@ create_triangle_mesh(std::shared_ptr<TriangleMesh> mesh,
     return tris;
 }
 
-// ── Leitor de .obj ───────────────────────────────────────────────────────────
+// Leitor de .obj
 
 // Converte um indice do OBJ (1-based; negativo conta do fim) para 0-based.
 static int objIndex(int raw, int count) {

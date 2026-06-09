@@ -13,9 +13,7 @@ bool Sphere::solve_intersection(const Ray& r, real_type& t_hit) const {
     real_type a      = dot(r.d, r.d);
     real_type half_b = dot(r.d, oc);
 
-    // Reformulacao: discriminante via componente perpendicular de oc a d_hat.
-    // Evita cancelamento catastrofico quando a camera esta longe da cena
-    // (oc tem componente paralela gigante que se anularia algebricamente).
+    // discriminante via componente perpendicular, evita cancelamento numerico
     Vector3   d_hat   = normalize(r.d);
     real_type proj    = dot(d_hat, oc);     // componente de oc paralela a d
     Vector3   oc_perp = oc - d_hat * proj;      // componente perpendicular

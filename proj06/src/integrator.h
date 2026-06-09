@@ -49,7 +49,7 @@ public:
 
 class BlinnPhongIntegrator : public SamplerIntegrator {
 private:
-    int max_depth;   //!< niveis maximos de recursao para a reflexao espelho
+    int max_depth;   // niveis maximos de recursao para a reflexao espelho
 
 public:
     BlinnPhongIntegrator(std::shared_ptr<Camera> cam, std::shared_ptr<Film> f,

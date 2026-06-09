@@ -77,7 +77,7 @@ std::optional<RGBColor> RayCastIntegrator::Li(const Ray& ray, const Scene& scene
 
     return fm->kd();
 }
-//*
+
 std::optional<RGBColor> BlinnPhongIntegrator::Li(const Ray& ray, const Scene& scene,
                                                  int depth) const {
 
@@ -116,8 +116,7 @@ std::optional<RGBColor> BlinnPhongIntegrator::Li(const Ray& ray, const Scene& sc
         Vector3  wi = ls.wi;    // l̂: direção normalizada PARA a luz
         RGBColor Ii = ls.intensity;     // intensidade efetiva (já com scale/att)
 
-        // ── SOMBRA: dispara um raio de sombra de sf.p ate a luz. Se algo
-        //    bloqueia, esta luz nao contribui (difuso + especular pulados).
+        // SOMBRA: dispara um raio de sombra ate a luz; se bloqueado, a luz nao contribui.
         VisibilityTester vis(sf.p, N, wi, ls.dist);
         if (!vis.unoccluded(scene))
             continue;
@@ -142,9 +141,7 @@ std::optional<RGBColor> BlinnPhongIntegrator::Li(const Ray& ray, const Scene& sc
     // Cor local do Blinn-Phong, ja no espaco de exibicao [0,255].
     RGBColor L255 = colorClamp255(colorScale(L, 255.0f));
 
-    // ── REFLEXAO ESPELHO (proj06) ──────────────────────────────────────────
-    // Se o material reflete e ainda nao atingimos a profundidade maxima,
-    // seguimos o raio refletido na cena e somamos km * cor_refletida.
+    // REFLEXAO ESPELHO: segue o raio refletido e soma km * cor_refletida.
     if (mat->is_mirror() && depth < max_depth) {
         Vector3 d    = normalize(r.d);            // direcao incidente
         Vector3 refl = reflect(d, N);             // reflexao perfeita sobre N

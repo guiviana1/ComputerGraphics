@@ -75,9 +75,7 @@ public:
     LightSample sample_Li(const Point3& hit_point) const override;
 };
 
-// Spotlight: luz pontual cuja emissao e restrita a um cone (proj06).
-// Dentro do cone interno (falloff) a intensidade e total; entre o cone
-// interno e o externo (cutoff) ela decai linearmente ate zero.
+// Spotlight: luz pontual com emissao restrita a um cone
 class SpotLight : public Light {
 private:
     Point3  position;     // localizacao da luz (from)

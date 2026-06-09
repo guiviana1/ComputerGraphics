@@ -9,13 +9,7 @@
 #include "material.h"
 #include "light.h"
 
-// ─────────────────────────────────────────────────────────────────────────────
-// SceneData — tudo que o parser entrega para a API montar uma cena
-//
-// Mudanças em relação à versão anterior:
-//   - Adicionado 'lights':       luzes não-ambient (point, directional)
-//   - Adicionado 'ambient_light': a luz ambient da cena (única)
-// ─────────────────────────────────────────────────────────────────────────────
+// Tudo que o parser entrega para a API montar uma cena.
 struct SceneData {
     std::shared_ptr<Camera>                  camera;
     std::shared_ptr<Background>              background;
